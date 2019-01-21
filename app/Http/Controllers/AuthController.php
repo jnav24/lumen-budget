@@ -32,7 +32,7 @@ class AuthController extends Controller
     /**
      * Create a new JWT token.
      *
-     * @param  \App\User   $user
+     * @param  \App\Models\User $user
      * @return string
      */
     protected function jwt(User $user) {
