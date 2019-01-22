@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Helpers\APIResponse;
 use Exception;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -11,6 +12,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Handler extends ExceptionHandler
 {
+    use APIResponse;
     /**
      * A list of the exception types that should not be reported.
      *
@@ -68,10 +70,6 @@ class Handler extends ExceptionHandler
             $exception = new HttpException($status, 'HTTP_INTERNAL_SERVER_ERROR');
         }
 
-        return response()->json([
-            'success' => false,
-            'status' => $status,
-            'message' => $exception->getMessage()
-        ], $status);
+        return $this->respondWithBadRequest([], $exception->getMessage());
     }
 }
