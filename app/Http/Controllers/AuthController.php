@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Validator;
 use App\Models\User;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
-use Firebase\JWT\ExpiredException;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -49,31 +48,33 @@ class AuthController extends Controller
     /**
      * Authenticate a user and return the token if the provided credentials are correct.
      *
-     * @param  \App\User $user
      * @return mixed
-     * @throws \Illuminate\Validation\ValidationException
      */
-    public function authenticate(User $user) {
-        $this->validate($this->request, [
-            'email'     => 'required|email',
-            'password'  => 'required'
-        ]);
+    public function authenticate()
+    {
+        try {
+            $this->validate($this->request, [
+                'email' => 'required|email',
+                'password' => 'required'
+            ]);
 
-        $user = User::where('email', $this->request->input('email'))->first();
-        if (!$user) {
-            return response()->json([
-                'error' => 'Email does not exist.'
-            ], 400);
+            $user = User::where('username', $this->request->input('email'))->first();
+
+            if (!$user) {
+                return $this->respondWithBadRequest([], 'Username does not exist');
+            }
+
+            if (Hash::check($this->request->input('password'), $user->password)) {
+                return $this->respondWithOK([
+                    'token' => $this->jwt($user),
+                ]);
+            }
+
+            return $this->respondWithBadRequest([], 'Username and/or password is incorrect.');
+        } catch (ValidationException $ex) {
+            return $this->respondWithBadRequest($ex->errors(), 'Errors validating request.');
+        } catch (\Exception $ex) {
+            return $this->respondWithBadRequest([], $ex->getMessage());
         }
-
-        if (Hash::check($this->request->input('password'), $user->password)) {
-            return response()->json([
-                'token' => $this->jwt($user)
-            ], 200);
-        }
-
-        return response()->json([
-            'error' => 'Email or password is wrong.'
-        ], 400);
     }
 }
