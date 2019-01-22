@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UserProfile;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -54,11 +55,11 @@ class AuthController extends Controller
     {
         try {
             $this->validate($this->request, [
-                'email' => 'required|email',
-                'password' => 'required'
+                'username' => 'required|email|unique:users',
+                'password' => 'required|min:8|max:24'
             ]);
 
-            $user = User::where('username', $this->request->input('email'))->first();
+            $user = User::where('username', $this->request->input('username'))->first();
 
             if (!$user) {
                 return $this->respondWithBadRequest([], 'Username does not exist');
@@ -71,6 +72,62 @@ class AuthController extends Controller
             }
 
             return $this->respondWithBadRequest([], 'Username and/or password is incorrect.');
+        } catch (ValidationException $ex) {
+            return $this->respondWithBadRequest($ex->errors(), 'Errors validating request.');
+        } catch (\Exception $ex) {
+            return $this->respondWithBadRequest([], $ex->getMessage());
+        }
+    }
+
+    /**
+     * Registers a new user
+     * Password must have; a capital & lowercase letter, a number, a special character
+     *
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
+    public function register()
+    {
+        try {
+            $this->validate($this->request, [
+                'first_name' => [
+                    'min:3',
+                    'required',
+                ],
+                'last_name' => [
+                    'min:3',
+                    'required',
+                ],
+                'username' => [
+                    'required',
+                    'email',
+                    'unique:users',
+                ],
+                'password' => [
+                    'max:24',
+                    'min:8',
+                    'required',
+                    'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\X])(?=.*[!$#%]).*$/',
+                ],
+                'confirm_password' => [
+                    'required',
+                    'same:password'
+                ]
+            ]);
+
+            $user = new User();
+            $userProfile = new UserProfile();
+
+            $user->username = $this->request->input('username');
+            $user->password = app('hash')->make($this->request->input('password'));
+            $user->save();
+
+            $userProfile->uid = $user->id;
+            $userProfile->email = $this->request->input('username');
+            $userProfile->first_name = $this->request->input('first_name');
+            $userProfile->last_name = $this->request->input('last_name');
+            $userProfile->save();
+
+            return $this->respondWithOK();
         } catch (ValidationException $ex) {
             return $this->respondWithBadRequest($ex->errors(), 'Errors validating request.');
         } catch (\Exception $ex) {
