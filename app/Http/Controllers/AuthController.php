@@ -55,7 +55,7 @@ class AuthController extends Controller
     {
         try {
             $this->validate($this->request, [
-                'username' => 'required|email|unique:users',
+                'username' => 'required|email',
                 'password' => 'required|min:8|max:24'
             ]);
 
@@ -66,8 +66,17 @@ class AuthController extends Controller
             }
 
             if (Hash::check($this->request->input('password'), $user->password)) {
+                $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
+
+                if (!$userProfile) {
+                    return $this->respondWithBadRequest([], 'There is a problem with your account. Please contact the administrator.');
+                }
+
                 return $this->respondWithOK([
                     'token' => $this->jwt($user),
+                    'user' => [
+                        'email' => $user->username,
+                    ] + $userProfile
                 ]);
             }
 

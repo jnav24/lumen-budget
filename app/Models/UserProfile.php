@@ -24,7 +24,11 @@ class UserProfile extends Model implements AuthenticatableContract, Authorizable
      *
      * @var array
      */
-    protected $hidden = [];
+    protected $hidden = [
+        'id',
+        'created_at',
+        'updated_at',
+    ];
 
     /**
      * The attributes that should be mutated to dates.
