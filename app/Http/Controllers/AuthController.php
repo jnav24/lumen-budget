@@ -143,4 +143,16 @@ class AuthController extends Controller
             return $this->respondWithBadRequest([], $ex->getMessage());
         }
     }
+
+    public function currentUser()
+    {
+        $user = $this->request->auth;
+        $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
+
+        return $this->respondWithOK([
+            'user' =>[
+                'email' => $user->username,
+            ] + $userProfile
+        ]);
+    }
 }
