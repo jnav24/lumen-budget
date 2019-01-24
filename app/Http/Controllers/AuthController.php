@@ -130,8 +130,8 @@ class AuthController extends Controller
             $user->password = app('hash')->make($this->request->input('password'));
             $user->save();
 
-            $userProfile->uid = $user->id;
-            $userProfile->email = $this->request->input('username');
+            $userProfile->user_id = $user->id;
+            $userProfile->image = '';
             $userProfile->first_name = $this->request->input('first_name');
             $userProfile->last_name = $this->request->input('last_name');
             $userProfile->save();
@@ -140,7 +140,7 @@ class AuthController extends Controller
         } catch (ValidationException $ex) {
             return $this->respondWithBadRequest($ex->errors(), 'Errors validating request.');
         } catch (\Exception $ex) {
-            return $this->respondWithBadRequest([], $ex->getMessage());
+            return $this->respondWithBadRequest([], 'Something unexpected happened');
         }
     }
 
