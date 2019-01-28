@@ -10,3 +10,7 @@ $router->post('register', 'AuthController@register');
 $router->group(['middleware' => 'jwt.auth'], function ($router) {
     $router->get('auth/user', 'AuthController@currentUser');
 });
+
+$router->group(['middleware' => 'jwt.auth'], function ($router) {
+    $router->get('bill/types', 'BillController@types');
+});
