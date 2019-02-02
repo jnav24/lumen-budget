@@ -3,9 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\BillTypes;
+use Illuminate\Http\Request;
 
 class BillController extends Controller
 {
+    /**
+     * Create a new controller instance.
+     *
+     * @param \Illuminate\Http\Request $request
+     *
+     */
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
+    }
+
     public function types()
     {
         try {
