@@ -28,6 +28,7 @@ class CreateBillTypes extends Migration
                 ['name' => 'Bank', 'slug' => 'bank', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
                 ['name' => 'Medical', 'slug' => 'medical', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
                 ['name' => 'Investment', 'slug' => 'investment', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+                ['name' => 'Job', 'slug' => 'job', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
             ]);
         }
     }
