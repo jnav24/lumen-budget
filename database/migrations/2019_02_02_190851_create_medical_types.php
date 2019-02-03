@@ -29,6 +29,7 @@ class CreateMedicalTypes extends Migration
                 ['name' => 'Dermatologist', 'slug' => 'dermatologist', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
                 ['name' => 'Otolaryngologist', 'slug' => 'otolaryngologist', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
                 ['name' => 'Psychiatrist', 'slug' => 'psychiatrist', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+                ['name' => 'Other', 'slug' => 'other', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
             ]);
         }
     }
