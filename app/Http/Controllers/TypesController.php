@@ -83,6 +83,21 @@ class TypesController extends Controller
     }
 
     /**
+     * Get Medical Types
+     *
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
+    public function medical()
+    {
+        try {
+            $types = ['types' => MedicalTypes::all()->toArray()];
+            return $this->respondWithOK($types);
+        } catch (\Exception $e) {
+            return $this->respondWithBadRequest([], 'Unable to retrieve medical types at this time.');
+        }
+    }
+
+    /**
      * Get Utility Types
      *
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response

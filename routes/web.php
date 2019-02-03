@@ -16,5 +16,6 @@ $router->group(['middleware' => 'jwt.auth'], function ($router) {
     $router->get('types/bill', 'TypesController@bill');
     $router->get('types/credit-card', 'TypesController@creditCard');
     $router->get('types/investment', 'TypesController@investment');
+    $router->get('types/medical', 'TypesController@medical');
     $router->get('types/utility', 'TypesController@utility');
 });
