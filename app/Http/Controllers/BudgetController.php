@@ -8,12 +8,17 @@ class BudgetController extends Controller
     {
         try {
             $budgets = [
-                'budgets' => [],
+                'templates' => [],
             ];
 
             return $this->respondWithOK($budgets);
         } catch (\Exception $e) {
             return $this->respondWithBadRequest([], 'Unable to retrieve budgets at this time.');
         }
+    }
+
+    public function saveBudgetTemplates()
+    {
+        return $this->respondWithOK(['templates' => 'saved']);
     }
 }
