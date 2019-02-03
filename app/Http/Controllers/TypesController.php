@@ -6,6 +6,7 @@ use App\Models\BankTypes;
 use App\Models\BillTypes;
 use App\Models\CreditCardTypes;
 use App\Models\InvestmentTypes;
+use App\Models\MedicalTypes;
 use App\Models\UtilityTypes;
 use Illuminate\Http\Request;
 
