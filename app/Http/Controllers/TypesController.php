@@ -8,21 +8,9 @@ use App\Models\CreditCardTypes;
 use App\Models\InvestmentTypes;
 use App\Models\MedicalTypes;
 use App\Models\UtilityTypes;
-use Illuminate\Http\Request;
 
 class TypesController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @param Request $request
-     *
-     */
-    public function __construct(Request $request)
-    {
-        $this->request = $request;
-    }
-
     /**
      * Get Bank Types
      *
