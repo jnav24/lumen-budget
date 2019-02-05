@@ -22,13 +22,13 @@ class CreateBillTypes extends Migration
             });
 
             DB::table('bill_types')->insert([
-                ['name' => 'Credit Card', 'slug' => 'credit_card', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
-                ['name' => 'Utility', 'slug' => 'utility', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+                ['name' => 'Credit Cards', 'slug' => 'credit_cards', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+                ['name' => 'Utilities', 'slug' => 'utilities', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
                 ['name' => 'Miscellaneous', 'slug' => 'miscellaneous', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
-                ['name' => 'Bank', 'slug' => 'bank', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+                ['name' => 'Banks', 'slug' => 'banks', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
                 ['name' => 'Medical', 'slug' => 'medical', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
-                ['name' => 'Investment', 'slug' => 'investment', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
-                ['name' => 'Job', 'slug' => 'job', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+                ['name' => 'Investments', 'slug' => 'investments', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+                ['name' => 'Jobs', 'slug' => 'jobs', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
             ]);
         }
     }
