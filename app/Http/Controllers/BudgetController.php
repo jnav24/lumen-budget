@@ -51,18 +51,14 @@ class BudgetController extends Controller
     {
         try {
             if (empty($this->request->input('expenses'))) {
-                return $this->respondWithBadRequest([], 'Unable to save budget template at this time.');
+                return $this->respondWithBadRequest([], 'Missing expenses.');
             }
 
-            dd($this->request->input('expenses'));
+            return $this->respondWithBadRequest($this->request->input('expenses'), 'testing');
 
-            if (!empty($this->request->input('id'))) {
-                $template = BudgetTemplates::find($this->request->input('id'));
+            $template = BudgetTemplates::where('user_id', $this->request->auth->id)->first();
 
-                if (empty($template)) {
-                    return $this->respondWithBadRequest([], 'Unable to save budget template at this time.');
-                }
-            } else {
+            if (empty($template)) {
                 $template = new BudgetTemplates();
                 $template->created_at = Carbon::now();
             }
@@ -85,50 +81,25 @@ class BudgetController extends Controller
         }
     }
 
-    private function insertOrUpdate(array $attributes, array $data, int $id, string $model)
-    {
-        foreach ($data as $item) {
-            // this might already be an array, line 33
-            $item = $item->toArray();
-
-            if (count($attributes) === count($item)) {
-                $template = array_intersect_key($item, $attributes); // add $id to array
-
-                if (!empty($item['id'])) {
-                    $date = [
-                        'updated_at' => Carbon::now(),
-                    ];
-                    DB::table($model)->where('id', $item['id'])->update(array_merge($template, $date));
-                } else {
-                    $date = [
-                        'created_at' => Carbon::now(),
-                        'updated_at' => Carbon::now(),
-                    ];
-                    DB::table($model)->insert(array_merge($template, $date));
-                }
-            }
-        }
-    }
-
-    private function bank_templates($expenses, $id)
+    private function banks_templates($expenses, $id)
     {
         $attributes = ['name', 'amount', 'bank_type_id', 'budget_template_id'];
         $this->insertOrUpdate($attributes, $expenses, $id, 'bank_templates');
     }
 
-    private function credit_card_templates($expenses, $id)
+    private function credit_cards_templates($expenses, $id)
     {
         $attributes = ['name', 'limit', 'last_4', 'exp_month', 'exp_year', 'apr', 'due_date', 'credit_card_type_id', 'budget_template_id'];
         $this->insertOrUpdate($attributes, $expenses, $id, 'credit_card_templates');
     }
 
-    private function investment_templates($expenses, $id)
+    private function investments_templates($expenses, $id)
     {
         $attributes = ['name', 'amount', 'investment_type_id', 'budget_template_id'];
         $this->insertOrUpdate($attributes, $expenses, $id, 'investment_templates');
     }
 
-    private function job_templates($expenses, $id)
+    private function jobs_templates($expenses, $id)
     {
         $attributes = ['name', 'amount', 'job_type_id', 'budget_template_id'];
         $this->insertOrUpdate($attributes, $expenses, $id, 'job_templates');
@@ -146,7 +117,7 @@ class BudgetController extends Controller
         $this->insertOrUpdate($attributes, $expenses, $id, 'miscellaneous_templates');
     }
 
-    private function utility_templates($expenses, $id)
+    private function utilities_templates($expenses, $id)
     {
         $attributes = ['name', 'amount', 'due_date', 'utility_type_id', 'budget_template_id'];
         $this->insertOrUpdate($attributes, $expenses, $id, 'utility_templates');
