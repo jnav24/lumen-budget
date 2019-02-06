@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\BudgetTemplates;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class BudgetController extends Controller
 {
@@ -23,7 +22,7 @@ class BudgetController extends Controller
                 ->toArray();
 
             if (empty($data)) {
-                return $this->respondWithBadRequest([], 'noob');
+                return $this->respondWithBadRequest([], 'User does not have any budget templates');
             }
 
             $budgets = [
@@ -54,8 +53,6 @@ class BudgetController extends Controller
                 return $this->respondWithBadRequest([], 'Missing expenses.');
             }
 
-            return $this->respondWithBadRequest($this->request->input('expenses'), 'testing');
-
             $template = BudgetTemplates::where('user_id', $this->request->auth->id)->first();
 
             if (empty($template)) {
@@ -83,7 +80,7 @@ class BudgetController extends Controller
 
     private function banks_templates($expenses, $id)
     {
-        $attributes = ['name', 'amount', 'bank_type_id', 'budget_template_id'];
+        $attributes = ['id', 'name', 'amount', 'bank_type_id'];
         $this->insertOrUpdate($attributes, $expenses, $id, 'bank_templates');
     }
 

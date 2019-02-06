@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\APIResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Laravel\Lumen\Routing\Controller as BaseController;
 
 class Controller extends BaseController
@@ -28,22 +30,22 @@ class Controller extends BaseController
         $this->request = $request;
     }
 
-    protected function isNotTempId($id): boolean
+    protected function isNotTempId($id)
     {
-        return stripos($id, 'temp_') === false;
+        return (stripos($id, 'temp_') === false);
     }
 
     protected function insertOrUpdate(array $attributes, array $data, int $id, string $model)
     {
         foreach ($data as $item) {
-            if ($item['deletion'] && $this->isNotTempId($item['id'])) {
+            if (!empty($item['deletion']) && $this->isNotTempId($item['id'])) {
                 DB::table($model)->where('id', $item['id'])->delete();
             } else if (count($attributes) === count($item)) {
-                $template = array_intersect_key($item, $attributes);
+                $template = array_intersect_key($item, array_flip($attributes));
 
                 $date = [
                     'budget_template_id' => $id,
-                    'updated_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 ];
 
                 if ($this->isNotTempId($item['id'])) {
