@@ -37,6 +37,8 @@ class Controller extends BaseController
 
     protected function insertOrUpdate(array $attributes, array $data, int $id, string $model)
     {
+        $result = [];
+
         foreach ($data as $item) {
             if (!empty($item['deletion']) && $this->isNotTempId($item['id'])) {
                 DB::table($model)->where('id', $item['id'])->delete();
@@ -49,12 +51,23 @@ class Controller extends BaseController
                 ];
 
                 if ($this->isNotTempId($item['id'])) {
-                    DB::table($model)->where('id', $item['id'])->update(array_merge($template, $date));
+                    $savedData = array_merge($template, $date);
+                    DB::table($model)->where('id', $item['id'])->update($savedData);
                 } else {
-                    $date['created_at'] = Carbon::now();
-                    DB::table($model)->insert(array_merge($template, $date));
+                    unset($template['id']);
+                    $date['created_at'] = Carbon::now()->format('Y-m-d H:i:s');
+                    $savedData = array_merge($template, $date);
+                    $id = DB::table($model)->insertGetId($savedData);
+                    $savedData['id'] = $id;
                 }
+
+                unset($savedData['budget_template_id']);
+                unset($savedData['created_at']);
+                unset($savedData['updated_at']);
+                $result[] = $savedData;
             }
         }
+
+        return $result;
     }
 }

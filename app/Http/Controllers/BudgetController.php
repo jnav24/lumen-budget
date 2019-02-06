@@ -63,60 +63,66 @@ class BudgetController extends Controller
             $template->user_id = $this->request->auth->id;
             $template->updated_at = Carbon::now();
             $template->save();
+            $savedData = [];
 
             foreach ($this->request->input('expenses') as $type => $expenses) {
                 $method = $type . '_templates';
 
                 if (method_exists($this, $method)) {
-                    $this->{$method}($expenses, $template->id);
+                    $savedData[$type] = $this->{$method}($expenses, $template->id);
                 }
             }
 
-            return $this->respondWithOK(['templates' => 'saved']);
+            return $this->respondWithOK([
+                'templates' => [
+                    'id' => $template->id,
+                    'expenses' => $savedData,
+                ]
+            ]);
         } catch (\Exception $e) {
-            return $this->respondWithBadRequest([], 'Unable to save budget template at this time.');
+            return $this->respondWithBadRequest([], $e->getMessage() . ' ' . 'Unable to save budget template at this time.');
         }
     }
 
     private function banks_templates($expenses, $id)
     {
         $attributes = ['id', 'name', 'amount', 'bank_type_id'];
-        $this->insertOrUpdate($attributes, $expenses, $id, 'bank_templates');
+        return $this->insertOrUpdate($attributes, $expenses, $id, 'bank_templates');
     }
 
     private function credit_cards_templates($expenses, $id)
     {
         $attributes = ['id', 'name', 'limit', 'last_4', 'exp_month', 'exp_year', 'apr', 'due_date', 'credit_card_type_id'];
-        $this->insertOrUpdate($attributes, $expenses, $id, 'credit_card_templates');
+        return $this->insertOrUpdate($attributes, $expenses, $id, 'credit_card_templates');
     }
 
     private function investments_templates($expenses, $id)
     {
         $attributes = ['id', 'name', 'amount', 'investment_type_id'];
-        $this->insertOrUpdate($attributes, $expenses, $id, 'investment_templates');
+        return $this->insertOrUpdate($attributes, $expenses, $id, 'investment_templates');
     }
 
     private function jobs_templates($expenses, $id)
     {
-        $attributes = ['id', 'name', 'amount', 'job_type_id'];
-        $this->insertOrUpdate($attributes, $expenses, $id, 'job_templates');
+        $attributes = ['id', 'name', 'amount', 'job_type_id', 'initial_pay_date'];
+        return $this->insertOrUpdate($attributes, $expenses, $id, 'job_templates');
     }
 
     private function medical_templates($expenses, $id)
     {
         $attributes = ['id', 'name', 'amount', 'due_date', 'medical_type_id'];
-        $this->insertOrUpdate($attributes, $expenses, $id, 'medical_templates');
+        return $this->insertOrUpdate($attributes, $expenses, $id, 'medical_templates');
     }
 
     private function miscellaneous_templates($expenses, $id)
     {
         $attributes = ['id', 'name', 'amount', 'due_date'];
-        $this->insertOrUpdate($attributes, $expenses, $id, 'miscellaneous_templates');
+        return $this->insertOrUpdate($attributes, $expenses, $id, 'miscellaneous_templates');
     }
 
     private function utilities_templates($expenses, $id)
     {
         $attributes = ['id', 'name', 'amount', 'due_date', 'utility_type_id'];
-        $this->insertOrUpdate($attributes, $expenses, $id, 'utility_templates');
+        return $this->insertOrUpdate($attributes, $expenses, $id, 'utility_templates');
     }
 }
