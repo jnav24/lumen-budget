@@ -86,37 +86,37 @@ class BudgetController extends Controller
 
     private function credit_cards_templates($expenses, $id)
     {
-        $attributes = ['name', 'limit', 'last_4', 'exp_month', 'exp_year', 'apr', 'due_date', 'credit_card_type_id', 'budget_template_id'];
+        $attributes = ['id', 'name', 'limit', 'last_4', 'exp_month', 'exp_year', 'apr', 'due_date', 'credit_card_type_id'];
         $this->insertOrUpdate($attributes, $expenses, $id, 'credit_card_templates');
     }
 
     private function investments_templates($expenses, $id)
     {
-        $attributes = ['name', 'amount', 'investment_type_id', 'budget_template_id'];
+        $attributes = ['id', 'name', 'amount', 'investment_type_id'];
         $this->insertOrUpdate($attributes, $expenses, $id, 'investment_templates');
     }
 
     private function jobs_templates($expenses, $id)
     {
-        $attributes = ['name', 'amount', 'job_type_id', 'budget_template_id'];
+        $attributes = ['id', 'name', 'amount', 'job_type_id'];
         $this->insertOrUpdate($attributes, $expenses, $id, 'job_templates');
     }
 
     private function medical_templates($expenses, $id)
     {
-        $attributes = ['name', 'amount', 'due_date', 'medical_type_id', 'budget_template_id'];
+        $attributes = ['id', 'name', 'amount', 'due_date', 'medical_type_id'];
         $this->insertOrUpdate($attributes, $expenses, $id, 'medical_templates');
     }
 
     private function miscellaneous_templates($expenses, $id)
     {
-        $attributes = ['name', 'amount', 'due_date', 'budget_template_id'];
+        $attributes = ['id', 'name', 'amount', 'due_date'];
         $this->insertOrUpdate($attributes, $expenses, $id, 'miscellaneous_templates');
     }
 
     private function utilities_templates($expenses, $id)
     {
-        $attributes = ['name', 'amount', 'due_date', 'utility_type_id', 'budget_template_id'];
+        $attributes = ['id', 'name', 'amount', 'due_date', 'utility_type_id'];
         $this->insertOrUpdate($attributes, $expenses, $id, 'utility_templates');
     }
 }
