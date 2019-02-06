@@ -32,4 +32,5 @@ $router->group(['middleware' => 'jwt.auth'], function ($router) {
 $router->group(['middleware' => 'jwt.auth'], function ($router) {
     $router->get('budget-templates', 'BudgetController@getAllBudgetTemplates');
     $router->post('budget-templates', 'BudgetController@saveBudgetTemplates');
+    $router->delete('budget-templates', 'BudgetController@deleteBudgetTemplate');
 });

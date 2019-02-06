@@ -2,11 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankTemplates;
 use App\Models\BudgetTemplates;
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 
 class BudgetController extends Controller
 {
+    public function deleteBudgetTemplate()
+    {
+        try {
+            $this->validate($this->request, [
+                'id' => 'required',
+                'type' => 'required',
+            ]);
+
+            $method = 'delete_' . $this->request->input('type') . '_templates';
+
+            if (method_exists($this, $method)) {
+                $this->{$method}($this->request->input('id'));
+                return $this->respondWithOK([]);
+            }
+
+            return $this->respondWithBadRequest([], 'Something with wrong. Please try again later.');
+        } catch (ValidationException $ex) {
+            return $this->respondWithBadRequest($ex->errors(), 'Errors validating request.');
+        } catch (\Exception $e) {
+            return $this->respondWithBadRequest([], 'Unable to delete budget template at this time.');
+        }
+    }
+
     public function getAllBudgetTemplates()
     {
         try {
@@ -84,42 +109,104 @@ class BudgetController extends Controller
         }
     }
 
+    /**
+     * Dynamic method called from deleteBudgetTemplate()
+     *
+     * @param int $id
+     * @throws \Exception
+     */
+    private function delete_banks_templates(int $id)
+    {
+        if (empty(BankTemplates::find($id)->delete())) {
+            throw new \Exception();
+        }
+    }
+
+    /**
+     * Dynamic method called from saveBudgetTemplates()
+     *
+     * @param $expenses
+     * @param $id
+     * @return array
+     */
     private function banks_templates($expenses, $id)
     {
         $attributes = ['id', 'name', 'amount', 'bank_type_id'];
         return $this->insertOrUpdate($attributes, $expenses, $id, 'bank_templates');
     }
 
+    /**
+     * Dynamic method called from saveBudgetTemplates()
+     *
+     * @param $expenses
+     * @param $id
+     * @return array
+     */
     private function credit_cards_templates($expenses, $id)
     {
         $attributes = ['id', 'name', 'limit', 'last_4', 'exp_month', 'exp_year', 'apr', 'due_date', 'credit_card_type_id'];
         return $this->insertOrUpdate($attributes, $expenses, $id, 'credit_card_templates');
     }
 
+    /**
+     * Dynamic method called from saveBudgetTemplates()
+     *
+     * @param $expenses
+     * @param $id
+     * @return array
+     */
     private function investments_templates($expenses, $id)
     {
         $attributes = ['id', 'name', 'amount', 'investment_type_id'];
         return $this->insertOrUpdate($attributes, $expenses, $id, 'investment_templates');
     }
 
+    /**
+     * Dynamic method called from saveBudgetTemplates()
+     *
+     * @param $expenses
+     * @param $id
+     * @return array
+     */
     private function jobs_templates($expenses, $id)
     {
         $attributes = ['id', 'name', 'amount', 'job_type_id', 'initial_pay_date'];
         return $this->insertOrUpdate($attributes, $expenses, $id, 'job_templates');
     }
 
+    /**
+     * Dynamic method called from saveBudgetTemplates()
+     *
+     * @param $expenses
+     * @param $id
+     * @return array
+     */
     private function medical_templates($expenses, $id)
     {
         $attributes = ['id', 'name', 'amount', 'due_date', 'medical_type_id'];
         return $this->insertOrUpdate($attributes, $expenses, $id, 'medical_templates');
     }
 
+    /**
+     * Dynamic method called from saveBudgetTemplates()
+     *
+     * @param $expenses
+     * @param $id
+     * @return array
+     */
     private function miscellaneous_templates($expenses, $id)
     {
         $attributes = ['id', 'name', 'amount', 'due_date'];
         return $this->insertOrUpdate($attributes, $expenses, $id, 'miscellaneous_templates');
     }
 
+    /**
+     * Dynamic method called from saveBudgetTemplates()
+     *
+     * @param $expenses
+     * @param $id
+     * @return array
+     */
     private function utilities_templates($expenses, $id)
     {
         $attributes = ['id', 'name', 'amount', 'due_date', 'utility_type_id'];
