@@ -4,6 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\BankTemplates;
 use App\Models\BudgetTemplates;
+use App\Models\CreditCardTemplates;
+use App\Models\InvestmentTemplates;
+use App\Models\JobTemplates;
+use App\Models\MedicalTemplates;
+use App\Models\MiscellaneousTemplates;
+use App\Models\UtilityTemplates;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
@@ -118,6 +124,84 @@ class BudgetController extends Controller
     private function delete_banks_templates(int $id)
     {
         if (empty(BankTemplates::find($id)->delete())) {
+            throw new \Exception();
+        }
+    }
+
+    /**
+     * Dynamic method called from deleteBudgetTemplate()
+     *
+     * @param int $id
+     * @throws \Exception
+     */
+    private function delete_credit_cards_templates(int $id)
+    {
+        if (empty(CreditCardTemplates::find($id)->delete())) {
+            throw new \Exception();
+        }
+    }
+
+    /**
+     * Dynamic method called from deleteBudgetTemplate()
+     *
+     * @param int $id
+     * @throws \Exception
+     */
+    private function delete_investments_templates(int $id)
+    {
+        if (empty(InvestmentTemplates::find($id)->delete())) {
+            throw new \Exception();
+        }
+    }
+
+    /**
+     * Dynamic method called from deleteBudgetTemplate()
+     *
+     * @param int $id
+     * @throws \Exception
+     */
+    private function delete_jobs_templates(int $id)
+    {
+        if (empty(JobTemplates::find($id)->delete())) {
+            throw new \Exception();
+        }
+    }
+
+    /**
+     * Dynamic method called from deleteBudgetTemplate()
+     *
+     * @param int $id
+     * @throws \Exception
+     */
+    private function delete_medical_templates(int $id)
+    {
+        if (empty(MedicalTemplates::find($id)->delete())) {
+            throw new \Exception();
+        }
+    }
+
+    /**
+     * Dynamic method called from deleteBudgetTemplate()
+     *
+     * @param int $id
+     * @throws \Exception
+     */
+    private function delete_miscellaneous_templates(int $id)
+    {
+        if (empty(MiscellaneousTemplates::find($id)->delete())) {
+            throw new \Exception();
+        }
+    }
+
+    /**
+     * Dynamic method called from deleteBudgetTemplate()
+     *
+     * @param int $id
+     * @throws \Exception
+     */
+    private function delete_utilities_templates(int $id)
+    {
+        if (empty(UtilityTemplates::find($id)->delete())) {
             throw new \Exception();
         }
     }
