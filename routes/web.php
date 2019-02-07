@@ -28,10 +28,17 @@ $router->group(['middleware' => 'jwt.auth'], function ($router) {
 });
 
 /**
+ * Budget Templates
+ */
+$router->group(['middleware' => 'jwt.auth'], function ($router) {
+    $router->get('budget-templates', 'BudgetTemplateController@getAllBudgetTemplates');
+    $router->post('budget-templates', 'BudgetTemplateController@saveBudgetTemplates');
+    $router->delete('budget-templates', 'BudgetTemplateController@deleteBudgetTemplate');
+});
+
+/**
  * Budgets
  */
 $router->group(['middleware' => 'jwt.auth'], function ($router) {
-    $router->get('budget-templates', 'BudgetController@getAllBudgetTemplates');
-    $router->post('budget-templates', 'BudgetController@saveBudgetTemplates');
-    $router->delete('budget-templates', 'BudgetController@deleteBudgetTemplate');
+    $router->get('budgets', 'BudgetController@getAllBudgets');
 });
