@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Budgets extends Model
+class Banks extends Model
 {
     /**
      * Hide columns
@@ -12,18 +12,15 @@ class Budgets extends Model
      * @var array
      */
     protected $hidden = [
-        'user_id',
+        'budget_id',
         'created_at',
         'updated_at',
     ];
 
     /**
-     * Banks
+     * Table name
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @var string
      */
-    public function banks()
-    {
-        return $this->hasMany(Banks::class, 'budget_id', 'id');
-    }
+    protected $table = 'banks';
 }

@@ -217,7 +217,7 @@ class BudgetTemplateController extends Controller
      */
     private function banks_templates($expenses, $id)
     {
-        $attributes = ['id', 'name', 'amount', 'bank_type_id'];
+        $attributes = $this->getBanksAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'bank_templates');
     }
 
@@ -230,7 +230,7 @@ class BudgetTemplateController extends Controller
      */
     private function credit_cards_templates($expenses, $id)
     {
-        $attributes = ['id', 'name', 'limit', 'last_4', 'exp_month', 'exp_year', 'apr', 'due_date', 'credit_card_type_id'];
+        $attributes = $this->getCreditCardsAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'credit_card_templates');
     }
 
@@ -243,7 +243,7 @@ class BudgetTemplateController extends Controller
      */
     private function investments_templates($expenses, $id)
     {
-        $attributes = ['id', 'name', 'amount', 'investment_type_id'];
+        $attributes = $this->getInvestmentAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'investment_templates');
     }
 
@@ -256,7 +256,7 @@ class BudgetTemplateController extends Controller
      */
     private function jobs_templates($expenses, $id)
     {
-        $attributes = ['id', 'name', 'amount', 'job_type_id', 'initial_pay_date'];
+        $attributes = $this->getJobsAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'job_templates');
     }
 
@@ -269,7 +269,7 @@ class BudgetTemplateController extends Controller
      */
     private function medical_templates($expenses, $id)
     {
-        $attributes = ['id', 'name', 'amount', 'due_date', 'medical_type_id'];
+        $attributes = $this->getMedicalAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'medical_templates');
     }
 
@@ -282,7 +282,7 @@ class BudgetTemplateController extends Controller
      */
     private function miscellaneous_templates($expenses, $id)
     {
-        $attributes = ['id', 'name', 'amount', 'due_date'];
+        $attributes = $this->getMiscellaneousAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'miscellaneous_templates');
     }
 
@@ -295,7 +295,7 @@ class BudgetTemplateController extends Controller
      */
     private function utilities_templates($expenses, $id)
     {
-        $attributes = ['id', 'name', 'amount', 'due_date', 'utility_type_id'];
+        $attributes = $this->getUtilitiesAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'utility_templates');
     }
 }

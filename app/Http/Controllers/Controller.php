@@ -75,4 +75,39 @@ class Controller extends BaseController
 
         return $result;
     }
+
+    protected function getBanksAttributes()
+    {
+        return ['id', 'name', 'amount', 'bank_type_id'];
+    }
+
+    protected function getCreditCardsAttributes()
+    {
+        return ['id', 'name', 'limit', 'last_4', 'exp_month', 'exp_year', 'apr', 'due_date', 'credit_card_type_id'];
+    }
+
+    protected function getInvestmentAttributes()
+    {
+        return ['id', 'name', 'amount', 'investment_type_id'];
+    }
+
+    protected function getJobsAttributes()
+    {
+        return ['id', 'name', 'amount', 'job_type_id', 'initial_pay_date'];
+    }
+
+    protected function getMedicalAttributes()
+    {
+        return ['id', 'name', 'amount', 'due_date', 'medical_type_id'];
+    }
+
+    protected function getMiscellaneousAttributes()
+    {
+        return ['id', 'name', 'amount', 'due_date'];
+    }
+
+    protected function getUtilitiesAttributes()
+    {
+        return ['id', 'name', 'amount', 'due_date', 'utility_type_id'];
+    }
 }
