@@ -8,6 +8,8 @@ use Illuminate\Validation\ValidationException;
 
 class BudgetController extends Controller
 {
+    protected $tableId = 'budget_id';
+
     public function getAllBudgets()
     {
         try {

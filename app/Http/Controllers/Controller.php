@@ -20,6 +20,13 @@ class Controller extends BaseController
     protected $request;
 
     /**
+     * Budget id name
+     *
+     * @var string
+     */
+    protected $tableId;
+
+    /**
      * Create a new controller instance.
      *
      * @param Request $request
@@ -40,13 +47,11 @@ class Controller extends BaseController
         $result = [];
 
         foreach ($data as $item) {
-            if (!empty($item['deletion']) && $this->isNotTempId($item['id'])) {
-                DB::table($model)->where('id', $item['id'])->delete();
-            } else if (count($attributes) === count($item)) {
+            if (count($attributes) === count($item)) {
                 $template = array_intersect_key($item, array_flip($attributes));
 
                 $date = [
-                    'budget_template_id' => $id,
+                    $this->tableId => $id,
                     'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 ];
 
@@ -61,7 +66,7 @@ class Controller extends BaseController
                     $savedData['id'] = $id;
                 }
 
-                unset($savedData['budget_template_id']);
+                unset($savedData[$this->tableId]);
                 unset($savedData['created_at']);
                 unset($savedData['updated_at']);
                 $result[] = $savedData;

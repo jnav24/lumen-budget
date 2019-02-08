@@ -15,6 +15,8 @@ use Illuminate\Validation\ValidationException;
 
 class BudgetTemplateController extends Controller
 {
+    protected $tableId = 'budget_template_id';
+
     public function deleteBudgetTemplate()
     {
         try {
