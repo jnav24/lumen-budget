@@ -54,8 +54,10 @@ class BudgetController extends Controller
 
             return $this->respondWithOK([
                 'budget' => [
+                    'id' => $budget->id,
                     'name' => $budget->name,
-                    'created_at' => $budget->created_at,
+                    'budget_cycle' => $budget->created_at->toDateTimeString(),
+                    'created_at' => $budget->created_at->toDateTimeString(),
                     'expenses' => $returnExpenses,
                 ],
             ]);
