@@ -22,6 +22,41 @@ class BudgetController extends Controller
         }
     }
 
+    public function getSingleBudgetExpenses($id)
+    {
+        try {
+            $data = Budgets::where('user_id', $this->request->auth->id)
+                ->where('id', $id)
+                ->with('banks')
+                ->with('credit_cards')
+                ->with('investments')
+                ->with('jobs')
+                ->with('medical')
+                ->with('miscellaneous')
+                ->with('utilities')
+                ->first();
+
+            return $this->respondWithOK([
+                'budget' => [
+                    'id' => $id,
+                    'name' => $data['name'],
+                    'budget_cycle' => $data->created_at->toDateTimeString(),
+                    'expenses' => [
+                        'banks' => $data['banks'],
+                        'credit_cards' => $data['credit_cards'],
+                        'investments' => $data['investments'],
+                        'jobs' => $data['jobs'],
+                        'medical' => $data['medical'],
+                        'miscellaneous' => $data['miscellaneous'],
+                        'utilities' => $data['utilities'],
+                    ],
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return $this->respondWithBadRequest([], 'Unable to retrieve budgets at this time');
+        }
+    }
+
     public function saveBudget()
     {
         try {
