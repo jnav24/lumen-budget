@@ -62,6 +62,7 @@ class BudgetController extends Controller
         try {
             $this->validate($this->request, [
                 'name' => 'required',
+                'cycle' => 'required',
                 'expenses' => 'required',
             ]);
 
@@ -72,7 +73,7 @@ class BudgetController extends Controller
             $budget = new Budgets();
             $budget->user_id = $this->request->auth->id;
             $budget->name = $this->request->input('name');
-            $budget->budget_cycle = Carbon::now()->format('Y-m-d H:i:s');
+            $budget->budget_cycle = $this->request->input('cycle');
             $budget->created_at = Carbon::now()->format('Y-m-d H:i:s');
             $budget->updated_at = Carbon::now()->format('Y-m-d H:i:s');
             $budget->save();
