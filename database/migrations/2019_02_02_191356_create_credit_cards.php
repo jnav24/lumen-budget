@@ -25,6 +25,8 @@ class CreateCreditCards extends Migration
                 $table->integer('due_date', false, 'unsigned');
                 $table->integer('credit_card_type_id', false, 'unsigned');
                 $table->integer('budget_id', false, 'unsigned');
+                $table->dateTime('paid_date');
+                $table->string('confirmation');
                 $table->timestamps();
             });
 
