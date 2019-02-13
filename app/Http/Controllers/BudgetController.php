@@ -92,7 +92,7 @@ class BudgetController extends Controller
                 'budget' => [
                     'id' => $budget->id,
                     'name' => $budget->name,
-                    'budget_cycle' => $budget->created_at->toDateTimeString(),
+                    'budget_cycle' => $budget->budget_cycle,
                     'created_at' => $budget->created_at->toDateTimeString(),
                     'expenses' => $returnExpenses,
                 ],
