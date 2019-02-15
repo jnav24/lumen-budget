@@ -21,6 +21,8 @@ class CreateUtilities extends Migration
                 $table->string('amount');
                 $table->integer('due_date', false, 'unsigned');
                 $table->integer('utility_type_id', false, 'unsigned');
+                $table->dateTime('paid_date');
+                $table->string('confirmation');
                 $table->timestamps();
             });
 
