@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Budgets;
+use App\Models\JobTypes;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
@@ -130,6 +131,7 @@ class BudgetController extends Controller
     private function save_jobs($id, $expenses)
     {
         $attributes = $this->getJobsAttributes();
+        $expenses = $this->generatePaidExpenses($expenses);
         return $this->insertOrUpdate($attributes, $expenses, $id, 'jobs');
     }
 
@@ -149,5 +151,66 @@ class BudgetController extends Controller
     {
         $attributes = $this->getUtilitiesAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'utilities');
+    }
+
+    private function generatePaidExpenses($expenses)
+    {
+        $currentMonth = Carbon::createFromTimeString($this->request->input('cycle'));
+        $results = [];
+
+        foreach ($expenses as $job) {
+            $type = JobTypes::find($job['job_type_id'])->toArray();
+            $startPay = Carbon::createFromTimeString($job['initial_pay_date']);
+
+
+            $method = 'get_' . $type['slug'];
+
+            if (method_exists($this, $method)) {
+                $results[] = $this->{$method}($job, $startPay, $currentMonth);
+            }
+        }
+
+        return $results;
+    }
+
+    private function get_bi_weekly($job, $startPay, $currentMonth)
+    {
+        $results = [];
+
+        $totalWeeks = ($currentMonth->weekOfYear - $startPay->weekOfYear);
+        $nextMonth = Carbon::createFromTimeString($this->request->input('cycle'))->addMonth();
+        $payWeek = $currentMonth;
+
+        if ($totalWeeks % 2) {
+            $payWeek->addDays(7);
+        }
+
+        $payWeek->addDays($startPay->dayOfWeek - $payWeek->dayOfWeek);
+        $results[] = [
+            'name' => $job['name'],
+            'amount' => $job['amount'],
+            'job_type_id' => $job['job_type_id'],
+            'initial_pay_date' => $payWeek->toDateString(),
+        ];
+
+        for ($i = 0; $i < ($nextMonth->weekOfYear - $payWeek->weekOfYear); $i = ($i+2)) {
+            if ($i === 0) {
+                continue;
+            }
+
+            $payWeek->addDays(14);
+
+            if ($currentMonth->format('M') === $payWeek->format('M')) {
+                $results[] = [
+                    'name' => $job['name'],
+                    'amount' => $job['amount'],
+                    'job_type_id' => $job['job_type_id'],
+                    'initial_pay_date' => $payWeek->toDateString(),
+                ];
+            }
+
+        }
+
+        return $results;
     }
 }
