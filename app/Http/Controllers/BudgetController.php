@@ -71,16 +71,20 @@ class BudgetController extends Controller
                 throw new \Exception('Invalid request');
             }
 
+            $expenses = $this->request->input('expenses');
+
             if (!empty($this->request->input('id'))) {
                 $budget = Budgets::find($this->request->input('id'));
 
                 if (empty($budget)) {
                     $budget = new Budgets();
                     $budget->created_at = Carbon::now()->format('Y-m-d H:i:s');
+                    $expenses['jobs'] = $this->generatePaidExpenses($expenses['jobs']);
                 }
             } else {
                 $budget = new Budgets();
                 $budget->created_at = Carbon::now()->format('Y-m-d H:i:s');
+                $expenses['jobs'] = $this->generatePaidExpenses($expenses['jobs']);
             }
 
             $budget->user_id = $this->request->auth->id;
@@ -91,7 +95,7 @@ class BudgetController extends Controller
 
             $returnExpenses = [];
 
-            foreach ($this->request->input('expenses') as $key => $expenseList) {
+            foreach ($expenses as $key => $expenseList) {
                 $method = 'save_' . $key;
 
                 if (method_exists($this, $method)) {
@@ -227,8 +231,6 @@ class BudgetController extends Controller
     private function save_jobs($id, $expenses)
     {
         $attributes = $this->getJobsAttributes();
-        // @TODO: check if you need to run this function
-        $expenses = $this->generatePaidExpenses($expenses);
         return $this->insertOrUpdate($attributes, $expenses, $id, 'jobs');
     }
 
