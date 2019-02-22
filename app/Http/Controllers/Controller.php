@@ -47,30 +47,28 @@ class Controller extends BaseController
         $result = [];
 
         foreach ($data as $item) {
-            if (count($attributes) === count($item)) {
-                $template = array_intersect_key($item, array_flip($attributes));
+            $template = array_intersect_key($item, array_flip($attributes));
 
-                $date = [
-                    $this->tableId => $id,
-                    'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                ];
+            $date = [
+                $this->tableId => $id,
+                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            ];
 
-                if ($this->isNotTempId($item['id'])) {
-                    $savedData = array_merge($template, $date);
-                    DB::table($model)->where('id', $item['id'])->update($savedData);
-                } else {
-                    unset($template['id']);
-                    $date['created_at'] = Carbon::now()->format('Y-m-d H:i:s');
-                    $savedData = array_merge($template, $date);
-                    $id = DB::table($model)->insertGetId($savedData);
-                    $savedData['id'] = $id;
-                }
-
-                unset($savedData[$this->tableId]);
-                unset($savedData['created_at']);
-                unset($savedData['updated_at']);
-                $result[] = $savedData;
+            if ($this->isNotTempId($item['id'])) {
+                $savedData = array_merge($template, $date);
+                DB::table($model)->where('id', $item['id'])->update($savedData);
+            } else {
+                unset($template['id']);
+                $date['created_at'] = Carbon::now()->format('Y-m-d H:i:s');
+                $savedData = array_merge($template, $date);
+                $id = DB::table($model)->insertGetId($savedData);
+                $savedData['id'] = $id;
             }
+
+            unset($savedData[$this->tableId]);
+            unset($savedData['created_at']);
+            unset($savedData['updated_at']);
+            $result[] = $savedData;
         }
 
         return $result;
