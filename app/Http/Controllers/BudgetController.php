@@ -354,12 +354,22 @@ class BudgetController extends Controller
     }
 
     /**
-     * Called dynamically from generatePaidExpenses()
+     * Get bi-weekly pay periods for a billing cycle; called dynamically from generatePaidExpenses()
      *
-     * @param $job
-     * @param $startPay
-     * @param $currentMonth
-     * @return array
+     * @param array $job {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     * @param Carbon $startPay
+     * @param Carbon $currentMonth
+     * @return array {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
      */
     private function get_bi_weekly($job, $startPay, $currentMonth)
     {
@@ -400,5 +410,27 @@ class BudgetController extends Controller
         }
 
         return $results;
+    }
+
+    /**
+     * Get one time payment billing cycle; called dynamically from generatePaidExpenses()
+     *
+     * @param array $job {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     * @param Carbon $startPay
+     * @param Carbon $currentMonth
+     * @return array {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     */
+    private function get_one_time($job, $startPay, $currentMonth) {
+        return $job;
     }
 }
