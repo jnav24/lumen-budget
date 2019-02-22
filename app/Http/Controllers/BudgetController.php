@@ -71,11 +71,21 @@ class BudgetController extends Controller
                 throw new \Exception('Invalid request');
             }
 
-            $budget = new Budgets();
+            if (!empty($this->request->input('id'))) {
+                $budget = Budgets::find($this->request->input('id'));
+
+                if (empty($budget)) {
+                    $budget = new Budgets();
+                    $budget->created_at = Carbon::now()->format('Y-m-d H:i:s');
+                }
+            } else {
+                $budget = new Budgets();
+                $budget->created_at = Carbon::now()->format('Y-m-d H:i:s');
+            }
+
             $budget->user_id = $this->request->auth->id;
             $budget->name = $this->request->input('name');
             $budget->budget_cycle = $this->request->input('cycle');
-            $budget->created_at = Carbon::now()->format('Y-m-d H:i:s');
             $budget->updated_at = Carbon::now()->format('Y-m-d H:i:s');
             $budget->save();
 
@@ -110,49 +120,219 @@ class BudgetController extends Controller
         // @TODO when saving a budget, update the budget_template values; i.e. bank amount, pay periods etc
     }
 
+    /**
+     * Saves banks info; called dynamically from saveBudget()
+     *
+     * @param integer $id Budget Id; Foreign Key
+     * @param array $expenses {
+     *      @value integer ['id'] (optional)
+     *      @value integer ['bank_type_id']
+     *      @value string ['amount']
+     *      @value string ['name']
+     * }
+     * @return array {
+     *      @value integer ['id']
+     *      @value integer ['bank_type_id']
+     *      @value string ['amount']
+     *      @value string ['name']
+     * }
+     */
     private function save_banks($id, $expenses)
     {
         $attributes = $this->getBanksAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'banks');
     }
 
+    /**
+     * Saves credit card info; called dynamically from saveBudget()
+     *
+     * @param integer $id Budget Id; Foreign Key
+     * @param array $expenses {
+     *      @value integer ['id'] (optional)
+     *      @value string ['name']
+     *      @value string ['limit']
+     *      @value string ['last_4'] (optional)
+     *      @value string ['exp_month'] (optional)
+     *      @value string ['exp_year'] (optional)
+     *      @value integer ['apr'] (optional)
+     *      @value integer ['due_date']
+     *      @value integer ['credit_card_type_id']
+     *      @value Datetime ['pay_date'] (optional)
+     *      @value string ['confirmation'] (optional)
+     *      @value string ['amount'] (optional)
+     * }
+     * @return array {
+     *      @value integer ['id']
+     *      @value string ['name']
+     *      @value string ['limit']
+     *      @value string ['last_4']
+     *      @value string ['exp_month']
+     *      @value string ['exp_year']
+     *      @value integer ['apr']
+     *      @value integer ['due_date']
+     *      @value integer ['credit_card_type_id']
+     *      @value Datetime ['pay_date']
+     *      @value string ['confirmation']
+     *      @value string ['amount']
+     * }
+     */
     private function save_credit_cards($id, $expenses)
     {
         $attributes = $this->getCreditCardsAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'credit_cards');
     }
 
+    /**
+     * Saves investments info; called dynamically from saveBudget()
+     *
+     * @param integer $id Budget Id; Foreign Key
+     * @param array $expenses {
+     *      @value integer ['id'] (optional)
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['investment_type_id']
+     * }
+     * @return array {
+     *      @value integer ['id']
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['investment_type_id']
+     * }
+     */
     private function save_investments($id, $expenses)
     {
         $attributes = $this->getInvestmentAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'investments');
     }
 
+    /**
+     * Saves jobs info; called dynamically from saveBudget()
+     *
+     * @param integer $id Budget Id; Foreign Key
+     * @param array $expenses {
+     *      @value integer ['id'] (optional)
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     * @return array {
+     *      @value integer ['id']
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     */
     private function save_jobs($id, $expenses)
     {
         $attributes = $this->getJobsAttributes();
+        // @TODO: check if you need to run this function
         $expenses = $this->generatePaidExpenses($expenses);
         return $this->insertOrUpdate($attributes, $expenses, $id, 'jobs');
     }
 
+    /**
+     * Saves medical info; called dynamically from saveBudget()
+     *
+     * @param integer $id Budget Id; Foreign Key
+     * @param array $expenses {
+     *      @value integer ['id'] (optional)
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['due_date']
+     *      @value integer ['medical_type_id']
+     *      @value Datetime ['pay_date'] (optional)
+     *      @value string ['confirmation'] (optional)
+     * }
+     * @return array {
+     *      @value integer ['id']
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['due_date']
+     *      @value integer ['medical_type_id']
+     *      @value Datetime ['pay_date']
+     *      @value string ['confirmation']
+     * }
+     */
     private function save_medical($id, $expenses)
     {
         $attributes = $this->getMedicalAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'medical');
     }
 
+    /**
+     * Saves miscellaneous info; called dynamically from saveBudget()
+     *
+     * @param integer $id Budget Id; Foreign Key
+     * @param array $expenses {
+     *      @value integer ['id'] (optional)
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['due_date']
+     *      @value Datetime ['pay_date'] (optional)
+     *      @value string ['confirmation'] (optional)
+     * }
+     * @return array {
+     *      @value integer ['id']
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['due_date']
+     *      @value Datetime ['pay_date']
+     *      @value string ['confirmation']
+     * }
+     */
     private function save_miscellaneous($id, $expenses)
     {
         $attributes = $this->getMiscellaneousAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'miscellaneous');
     }
 
+    /**
+     * Saves utilities info; called dynamically from saveBudget()
+     *
+     * @param integer $id Budget Id; Foreign Key
+     * @param array $expenses {
+     *      @value integer ['id'] (optional)
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['due_date']
+     *      @value integer ['utility_type_id']
+     *      @value Datetime ['pay_date'] (optional)
+     *      @value string ['confirmation'] (optional)
+     * }
+     * @return array {
+     *      @value integer ['id']
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['due_date']
+     *      @value integer ['utility_type_id']
+     *      @value Datetime ['pay_date']
+     *      @value string ['confirmation']
+     * }
+     */
     private function save_utilities($id, $expenses)
     {
         $attributes = $this->getUtilitiesAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'utilities');
     }
 
+    /**
+     * For employment, create a record for all pay dates in a billing cycle based on user input
+     *
+     * @param array $expenses {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     * @return array {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     */
     private function generatePaidExpenses($expenses)
     {
         $currentMonth = Carbon::createFromTimeString($this->request->input('cycle'));
@@ -173,6 +353,14 @@ class BudgetController extends Controller
         return $results;
     }
 
+    /**
+     * Called dynamically from generatePaidExpenses()
+     *
+     * @param $job
+     * @param $startPay
+     * @param $currentMonth
+     * @return array
+     */
     private function get_bi_weekly($job, $startPay, $currentMonth)
     {
         $results = [];
