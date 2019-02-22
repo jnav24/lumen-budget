@@ -83,7 +83,7 @@ class Controller extends BaseController
 
     protected function getCreditCardsAttributes()
     {
-        return ['id', 'name', 'limit', 'last_4', 'exp_month', 'exp_year', 'apr', 'due_date', 'credit_card_type_id'];
+        return ['id', 'name', 'limit', 'last_4', 'exp_month', 'exp_year', 'apr', 'due_date', 'credit_card_type_id', 'amount', 'pay_date', 'confirmation'];
     }
 
     protected function getInvestmentAttributes()
@@ -98,16 +98,16 @@ class Controller extends BaseController
 
     protected function getMedicalAttributes()
     {
-        return ['id', 'name', 'amount', 'due_date', 'medical_type_id'];
+        return ['id', 'name', 'amount', 'due_date', 'medical_type_id', 'pay_date', 'confirmation'];
     }
 
     protected function getMiscellaneousAttributes()
     {
-        return ['id', 'name', 'amount', 'due_date'];
+        return ['id', 'name', 'amount', 'due_date', 'pay_date', 'confirmation'];
     }
 
     protected function getUtilitiesAttributes()
     {
-        return ['id', 'name', 'amount', 'due_date', 'utility_type_id'];
+        return ['id', 'name', 'amount', 'due_date', 'utility_type_id', 'pay_date', 'confirmation'];
     }
 }
