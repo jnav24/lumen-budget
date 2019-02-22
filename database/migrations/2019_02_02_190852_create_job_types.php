@@ -26,6 +26,7 @@ class CreateJobTypes extends Migration
                 ['name' => 'Bi-Weekly', 'slug' => 'bi_weekly', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
                 ['name' => 'Semi-Monthly', 'slug' => 'semi_monthly', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
                 ['name' => 'Monthly', 'slug' => 'monthly', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+                ['name' => 'One Time', 'slug' => 'one-time', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
             ]);
         }
     }
