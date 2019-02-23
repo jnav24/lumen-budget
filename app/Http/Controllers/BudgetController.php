@@ -14,7 +14,7 @@ class BudgetController extends Controller
     public function getAllBudgets()
     {
         try {
-            $data = Budgets::where('user_id', $this->request->auth->id)->get();
+            $data = Budgets::where('user_id', $this->request->auth->id)->orderBy('id', 'desc')->get();
             return $this->respondWithOK([
                 'templates' => $data,
             ]);
@@ -41,7 +41,7 @@ class BudgetController extends Controller
                 'budget' => [
                     'id' => $id,
                     'name' => $data['name'],
-                    'budget_cycle' => $data->created_at->toDateTimeString(),
+                    'budget_cycle' => $data['budget_cycle'],
                     'expenses' => [
                         'banks' => $data['banks'],
                         'credit_cards' => $data['credit_cards'],
