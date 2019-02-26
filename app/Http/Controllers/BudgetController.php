@@ -119,11 +119,6 @@ class BudgetController extends Controller
         }
     }
 
-    public function updateBudget()
-    {
-        // @TODO when saving a budget, update the budget_template values; i.e. bank amount, pay periods etc
-    }
-
     /**
      * Saves banks info; called dynamically from saveBudget()
      *
