@@ -343,7 +343,7 @@ class BudgetController extends Controller
             $method = 'get_' . $type['slug'];
 
             if (method_exists($this, $method)) {
-                $results[] = $this->{$method}($job, $startPay, $currentMonth);
+                $results = array_merge($results, $this->{$method}($job, $startPay, $currentMonth));
             }
         }
 
@@ -382,10 +382,11 @@ class BudgetController extends Controller
 
         $payWeek->addDays($startPay->dayOfWeek - $payWeek->dayOfWeek);
         $results[] = [
+            'id' => $job['id'],
             'name' => $job['name'],
             'amount' => $job['amount'],
             'job_type_id' => $job['job_type_id'],
-            'initial_pay_date' => $payWeek->toDateString(),
+            'initial_pay_date' => $payWeek->toDateTimeString(),
         ];
 
         for ($i = 0; $i < ($nextMonth->weekOfYear - $payWeek->weekOfYear); $i = ($i+2)) {
@@ -397,10 +398,11 @@ class BudgetController extends Controller
 
             if ($currentMonth->format('M') === $payWeek->format('M')) {
                 $results[] = [
+                    'id' => $job['id'],
                     'name' => $job['name'],
                     'amount' => $job['amount'],
                     'job_type_id' => $job['job_type_id'],
-                    'initial_pay_date' => $payWeek->toDateString(),
+                    'initial_pay_date' => $payWeek->toDateTimeString(),
                 ];
             }
 
