@@ -45,14 +45,13 @@ class Controller extends BaseController
     protected function insertOrUpdate(array $attributes, array $data, int $id, string $model)
     {
         $result = [];
+        $date = [
+            $this->tableId => $id,
+            'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ];
 
         foreach ($data as $item) {
             $template = array_intersect_key($item, array_flip($attributes));
-
-            $date = [
-                $this->tableId => $id,
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
-            ];
 
             if ($this->isNotTempId($item['id'])) {
                 $savedData = array_merge($template, $date);

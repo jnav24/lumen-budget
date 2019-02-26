@@ -34,8 +34,6 @@ class CreateBudgets extends Migration
             Schema::create('budget_templates', function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('user_id');
-                $table->string('name');
-                $table->dateTime('budget_cycle');
                 $table->timestamps();
             });
 
