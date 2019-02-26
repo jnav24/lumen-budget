@@ -20,6 +20,7 @@ class CreateBanks extends Migration
                 $table->string('amount');
                 $table->integer('bank_type_id', false, 'unsigned');
                 $table->integer('budget_id', false, 'unsigned');
+                $table->integer('bank_template_id', false, 'unsigned');
                 $table->timestamps();
             });
 
