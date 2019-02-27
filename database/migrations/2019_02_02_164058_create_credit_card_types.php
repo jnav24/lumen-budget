@@ -26,6 +26,7 @@ class CreateCreditCardTypes extends Migration
                 ['name' => 'Visa', 'slug' => 'visa', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
                 ['name' => 'Discover', 'slug' => 'discover', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
                 ['name' => 'American Express', 'slug' => 'american_express', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+                ['name' => 'Store', 'slug' => 'store', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
             ]);
         }
     }
