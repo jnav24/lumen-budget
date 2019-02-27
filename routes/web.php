@@ -43,4 +43,5 @@ $router->group(['middleware' => 'jwt.auth'], function ($router) {
     $router->get('budgets', 'BudgetController@getAllBudgets');
     $router->get('budgets/{id}', 'BudgetController@getSingleBudgetExpenses');
     $router->post('budgets', 'BudgetController@saveBudget');
+    $router->delete('budgets/{id}', 'BudgetController@deleteBudget');
 });

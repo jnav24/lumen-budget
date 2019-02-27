@@ -2,8 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Banks;
 use App\Models\Budgets;
+use App\Models\CreditCards;
+use App\Models\Investments;
+use App\Models\Jobs;
 use App\Models\JobTypes;
+use App\Models\Medical;
+use App\Models\Miscellaneous;
+use App\Models\Utilities;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
@@ -116,6 +123,22 @@ class BudgetController extends Controller
             return $this->respondWithBadRequest($e->getMessage(), 'Errors validating request.');
         } catch (\Exception $e) {
             return $this->respondWithBadRequest([], 'Unable to save budget at this time.');
+        }
+    }
+
+    public function deleteBudget($id) {
+        try {
+            Banks::where($this->tableId, $id)->delete();
+            CreditCards::where($this->tableId, $id)->delete();
+            Investments::where($this->tableId, $id)->delete();
+            Jobs::where($this->tableId, $id)->delete();
+            Medical::where($this->tableId, $id)->delete();
+            Miscellaneous::where($this->tableId, $id)->delete();
+            Utilities::where($this->tableId, $id)->delete();
+            Budgets::find($id)->delete();
+            return $this->respondWithOK([]);
+        } catch (\Exception $e) {
+            return $this->respondWithBadRequest([], $e->getMessage() . ': Unable to delete budget at this time');
         }
     }
 
