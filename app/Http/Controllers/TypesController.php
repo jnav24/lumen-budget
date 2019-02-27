@@ -35,7 +35,7 @@ class TypesController extends Controller
     public function bill()
     {
         try {
-            $types = ['types' => BillTypes::all()->toArray()];
+            $types = ['types' => BillTypes::orderBy('slug')->get()->toArray()];
             return $this->respondWithOK($types);
         } catch (\Exception $e) {
             return $this->respondWithBadRequest([], 'Unable to retrieve bill types at this time.');
