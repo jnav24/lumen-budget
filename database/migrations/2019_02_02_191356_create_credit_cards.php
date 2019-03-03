@@ -28,6 +28,7 @@ class CreateCreditCards extends Migration
                 $table->dateTime('paid_date');
                 $table->string('confirmation');
                 $table->string('amount');
+                $table->string('balance');
                 $table->timestamps();
             });
 
@@ -57,6 +58,7 @@ class CreateCreditCards extends Migration
                 $table->integer('credit_card_type_id', false, 'unsigned');
                 $table->integer('budget_template_id', false, 'unsigned');
                 $table->string('amount');
+                $table->string('balance');
                 $table->timestamps();
             });
 
