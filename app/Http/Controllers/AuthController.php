@@ -21,7 +21,7 @@ class AuthController extends Controller
             'iss' => "lumen-jwt",
             'sub' => $user->id,
             'iat' => time(),
-            'exp' => time() + 60*60
+            'exp' => time() + 60 * 160
         ];
 
         return JWT::encode($payload, env('JWT_SECRET'));
