@@ -80,7 +80,7 @@ class Controller extends BaseController
 
     protected function getCreditCardsAttributes()
     {
-        return ['id', 'name', 'limit', 'last_4', 'exp_month', 'exp_year', 'apr', 'due_date', 'credit_card_type_id', 'amount', 'paid_date', 'confirmation'];
+        return ['id', 'name', 'limit', 'last_4', 'exp_month', 'exp_year', 'apr', 'due_date', 'credit_card_type_id', 'amount', 'paid_date', 'confirmation', 'balance'];
     }
 
     protected function getInvestmentAttributes()
