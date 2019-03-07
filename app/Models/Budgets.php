@@ -18,6 +18,16 @@ class Budgets extends Model
     ];
 
     /**
+     * Aggregations
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function aggregations()
+    {
+        return $this->hasMany(BudgetAggregation::class, 'budget_id', 'id');
+    }
+
+    /**
      * Banks
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

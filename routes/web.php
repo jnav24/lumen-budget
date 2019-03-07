@@ -45,3 +45,10 @@ $router->group(['middleware' => 'jwt.auth'], function ($router) {
     $router->post('budgets', 'BudgetController@saveBudget');
     $router->delete('budgets/{id}', 'BudgetController@deleteBudget');
 });
+
+/**
+ * Aggregation
+ */
+$router->group(['middleware' => 'jwt.auth'], function ($router) {
+    $router->get('budget-aggregate', 'BudgetAggregationController@getYearlyAggregation');
+});
