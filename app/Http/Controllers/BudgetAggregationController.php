@@ -62,11 +62,13 @@ class BudgetAggregationController extends Controller
 
             return $this->respondWithOK([
                 'unpaid' => [
-                    'credit_cards' => $creditCards,
-                    'medical' => $medical,
-                    'miscellaneous' => $misc,
-                    'utilities' => $utilities,
-                    'total' => ($creditCards + $medical + $misc + $utilities),
+                    'id' => $budget['id'],
+                    'totals' => [
+                        'credit_cards' => $creditCards,
+                        'medical' => $medical,
+                        'miscellaneous' => $misc,
+                        'utilities' => $utilities,
+                    ],
                 ],
             ]);
         } catch (\Exception $e) {
