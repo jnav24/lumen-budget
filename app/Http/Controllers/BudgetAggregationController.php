@@ -41,20 +41,28 @@ class BudgetAggregationController extends Controller
 
             if (!empty($budget)) {
                 $budget = $budget[0];
-                $creditCards = CreditCards::whereNull('confirmation')
-                    ->whereNull('paid_date')
+                $creditCards = CreditCards::where(function ($query) {
+                        $query->whereNull('confirmation')
+                            ->orWhere('confirmation', '');
+                    })
                     ->where('budget_id', $budget['id'])
                     ->count();
-                $utilities = Utilities::whereNull('confirmation')
-                    ->whereNull('paid_date')
+                $utilities = Utilities::where(function ($query) {
+                        $query->whereNull('confirmation')
+                            ->orWhere('confirmation', '');
+                    })
                     ->where('budget_id', $budget['id'])
                     ->count();
-                $misc = Miscellaneous::whereNull('confirmation')
-                    ->whereNull('paid_date')
+                $misc = Miscellaneous::where(function ($query) {
+                        $query->whereNull('confirmation')
+                            ->orWhere('confirmation', '');
+                    })
                     ->where('budget_id', $budget['id'])
                     ->count();
-                $medical = Medical::whereNull('confirmation')
-                    ->whereNull('paid_date')
+                $medical = Medical::where(function ($query) {
+                        $query->whereNull('confirmation')
+                            ->orWhere('confirmation', '');
+                    })
                     ->where('budget_id', $budget['id'])
                     ->count();
             }
