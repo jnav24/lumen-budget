@@ -51,4 +51,5 @@ $router->group(['middleware' => 'jwt.auth'], function ($router) {
  */
 $router->group(['middleware' => 'jwt.auth'], function ($router) {
     $router->get('budget-aggregate', 'BudgetAggregationController@getYearlyAggregation');
+    $router->get('unpaid-aggregate', 'BudgetAggregationController@getCountOfUnPaidBills');
 });
