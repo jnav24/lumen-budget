@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Banks;
+use App\Models\BudgetAggregation;
 use App\Models\Budgets;
 use App\Models\CreditCards;
 use App\Models\Investments;
@@ -17,6 +18,8 @@ use Illuminate\Validation\ValidationException;
 class BudgetController extends Controller
 {
     protected $tableId = 'budget_id';
+    private $earned = ['jobs'];
+    private $spent = ['credit_cards', 'medical', 'miscellaneous', 'utilities'];
 
     public function getAllBudgets()
     {
@@ -109,6 +112,8 @@ class BudgetController extends Controller
                     $returnExpenses[$key] = $this->{$method}($budget->id, $expenseList);
                 }
             }
+
+            $this->setupAndSaveAggregation($budget->id, $expenses);
 
             return $this->respondWithOK([
                 'budget' => [
@@ -335,6 +340,55 @@ class BudgetController extends Controller
     {
         $attributes = $this->getUtilitiesAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'utilities');
+    }
+
+    private function setupAndSaveAggregation($budgetId, $allExpenses)
+    {
+        $earnedTotal = $this->getAggregationTotal($this->earned, $allExpenses);
+        $spentTotal = $this->getAggregationTotal($this->spent, $allExpenses);
+        $savedTotal = number_format((float)($earnedTotal - $spentTotal), 2, '.', '');
+
+        $this->saveAggregation($budgetId, 'earned', $earnedTotal);
+        $this->saveAggregation($budgetId, 'saved', $savedTotal);
+        $this->saveAggregation($budgetId, 'spent', $spentTotal);
+    }
+
+    private function getAggregationTotal($attributes, $allExpenses)
+    {
+        $total = 0;
+
+        $keys = array_keys($allExpenses);
+        $intersect = array_intersect($attributes, $keys);
+
+        foreach ($intersect as $key => $value) {
+            foreach ($allExpenses[$value] as $item) {
+                if (!empty($item['amount'])) {
+                    $total = ((float)$item['amount'] + $total);
+                }
+            }
+        }
+
+        return number_format((float)$total, 2, '.', '');
+    }
+
+    private function saveAggregation($budgetId, $type, $total)
+    {
+        $budget = BudgetAggregation::where('budget_id', $budgetId)
+            ->where('type', $type)
+            ->where('user_id', $this->request->auth->id)
+            ->first();
+
+        if (empty($budget)) {
+            $budget = new BudgetAggregation();
+            $budget->type = $type;
+            $budget->budget_id = $budgetId;
+            $budget->user_id = $this->request->auth->id;
+            $budget->created_at = Carbon::now()->format('Y-m-d H:i:s');
+        }
+
+        $budget->value = $total;
+        $budget->updated_at = Carbon::now()->format('Y-m-d H:i:s');
+        $budget->save();
     }
 
     /**
