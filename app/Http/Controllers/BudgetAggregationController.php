@@ -26,18 +26,6 @@ class BudgetAggregationController extends Controller
         }
     }
 
-    public function saveYearlyAggregation()
-    {
-        try {
-            // save earned, spent, and saved by budget_cycle and budget_id and user_id
-            return $this->respondWithOK([
-                'saved' => true,
-            ]);
-        } catch (\Exception $e) {
-            return $this->respondWithBadRequest([], '');
-        }
-    }
-
     public function getCountOfUnPaidBills()
     {
         try {
