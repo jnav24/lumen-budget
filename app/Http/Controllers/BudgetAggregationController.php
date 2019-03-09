@@ -26,6 +26,42 @@ class BudgetAggregationController extends Controller
         }
     }
 
+    public function getCurrentYearAggregation()
+    {
+        try {
+            $returned = [];
+            $data = Budgets::where('user_id', $this->request->auth->id)
+                ->where('budget_cycle', 'like', Carbon::now()->format('Y') . '-%')
+                ->with('aggregations')
+                ->orderBy('budget_cycle', 'asc')
+                ->get()
+                ->toArray();
+
+            if (!empty($data)) {
+                $year = Carbon::now()->format('Y');
+                $returned[$year] = [];
+
+                foreach ($data as $item) {
+                    // check the budget_cycle
+                    // if budget_cycle is NOT in order, return a 0
+                    // else return aggregate value
+
+                    foreach ($item['aggregations'] as $aggregate) {
+                        if (empty($returned[$year][$aggregate['type']])) {
+                            $returned[$year][$aggregate['type']] = [];
+                        }
+
+                        array_push($returned[$year][$aggregate['type']], $aggregate['value']);
+                    }
+                }
+            }
+
+            return $this->respondWithOK(['budget' => $returned]);
+        } catch (\Exception $e) {
+            return $this->respondWithBadRequest([], $e->getMessage() . ': Unable to retrieve aggregation at this time');
+        }
+    }
+
     public function getCountOfUnPaidBills()
     {
         try {
