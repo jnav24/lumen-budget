@@ -14,13 +14,28 @@ class BudgetAggregationController extends Controller
     public function getYearlyAggregation()
     {
         try {
-            $data = Budgets::where('user_id', $this->request->auth)
+            $data = Budgets::where('user_id', $this->request->auth->id)
                 ->with('aggregations')
-                ->orderBy('budget_cycle', 'desc')
+                ->orderBy('budget_cycle', 'asc')
                 ->get()
                 ->toArray();
+            $returned = [];
+            $years = [];
 
-            return $this->respondWithOK(['budget' => $this->sortAggregateDataTest($data)]);
+            if (!empty($data)) {
+                foreach ($data as $item) {
+                    $year = Carbon::createFromTimeString($item['budget_cycle'])->format('Y');
+
+                    if (!in_array($year, $years)) {
+                        $years[] = $year;
+                        $returned[$year] = $this->sortAggregateData($data);
+                    } else {
+                        // remove unneeded data from copy of the $data
+                    }
+                }
+            }
+
+            return $this->respondWithOK(['aggregations' => $returned]);
         } catch (\Exception $e) {
             return $this->respondWithBadRequest([], 'Unable to retrieve aggregation at this time');
         }
@@ -38,7 +53,7 @@ class BudgetAggregationController extends Controller
                 ->toArray();
 
             if (!empty($data)) {
-                $returned = $this->sortAggregateData($year, $data);
+                $returned[$year] = $this->sortAggregateData($data);
             }
 
             return $this->respondWithOK(['aggregate' => $returned]);
@@ -105,14 +120,12 @@ class BudgetAggregationController extends Controller
         }
     }
 
-    private function sortAggregateData($year, $data)
+    private function sortAggregateData($data)
     {
         $returned = [
-            $year => [
-                'earned' => [],
-                'saved' => [],
-                'spent' => [],
-            ],
+            'earned' => [],
+            'saved' => [],
+            'spent' => [],
         ];
         $month = 1;
 
@@ -120,14 +133,14 @@ class BudgetAggregationController extends Controller
             $cycleMonth = (int)Carbon::createFromTimeString($item['budget_cycle'])->format('n');
 
             if ($month < $cycleMonth) {
-                $returned[$year]['earned'][] = '0.00';
-                $returned[$year]['saved'][] = '0.00';
-                $returned[$year]['spent'][] = '0.00';
+                $returned['earned'][] = '0.00';
+                $returned['saved'][] = '0.00';
+                $returned['spent'][] = '0.00';
             }
 
             if ($month === $cycleMonth) {
                 foreach ($item['aggregations'] as $aggregate) {
-                    $returned[$year][$aggregate['type']][] = $aggregate['value'];
+                    $returned[$aggregate['type']][] = $aggregate['value'];
                 }
             }
 
@@ -136,9 +149,9 @@ class BudgetAggregationController extends Controller
 
         if ($month < 12) {
             for ($i = $month; $i <= 12; $i++) {
-                $returned[$year]['earned'][] = '0.00';
-                $returned[$year]['saved'][] = '0.00';
-                $returned[$year]['spent'][] = '0.00';
+                $returned['earned'][] = '0.00';
+                $returned['saved'][] = '0.00';
+                $returned['spent'][] = '0.00';
             }
         }
 
