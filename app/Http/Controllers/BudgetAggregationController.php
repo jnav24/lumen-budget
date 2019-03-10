@@ -30,7 +30,7 @@ class BudgetAggregationController extends Controller
                         $years[] = $year;
                         $returned[$year] = $this->sortAggregateData($data);
                     } else {
-                        // remove unneeded data from copy of the $data
+                        // @todo remove unneeded data from copy of the $data??
                     }
                 }
             }
