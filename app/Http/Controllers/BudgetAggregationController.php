@@ -120,6 +120,12 @@ class BudgetAggregationController extends Controller
         }
     }
 
+    /**
+     * Sorts data from the budgets table joined with budget aggregation table
+     *
+     * @param $data
+     * @return array
+     */
     private function sortAggregateData($data)
     {
         $returned = [
