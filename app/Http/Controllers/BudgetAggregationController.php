@@ -39,24 +39,41 @@ class BudgetAggregationController extends Controller
 
             if (!empty($data)) {
                 $year = Carbon::now()->format('Y');
-                $returned[$year] = [];
+                $returned[$year] = [
+                    'earned' => [],
+                    'saved' => [],
+                    'spent' => [],
+                ];
+                $month = 1;
 
                 foreach ($data as $item) {
-                    // check the budget_cycle
-                    // if budget_cycle is NOT in order, return a 0
-                    // else return aggregate value
+                    $cycleMonth = (int)Carbon::createFromTimeString($item['budget_cycle'])->format('n');
 
-                    foreach ($item['aggregations'] as $aggregate) {
-                        if (empty($returned[$year][$aggregate['type']])) {
-                            $returned[$year][$aggregate['type']] = [];
+                    if ($month < $cycleMonth) {
+                        $returned[$year]['earned'][] = '0.00';
+                        $returned[$year]['saved'][] = '0.00';
+                        $returned[$year]['spent'][] = '0.00';
+                    }
+
+                    if ($month === $cycleMonth) {
+                        foreach ($item['aggregations'] as $aggregate) {
+                            $returned[$year][$aggregate['type']][] = $aggregate['value'];
                         }
+                    }
 
-                        array_push($returned[$year][$aggregate['type']], $aggregate['value']);
+                    $month++;
+                }
+
+                if ($month < 12) {
+                    for ($i = $month; $i <= 12; $i++) {
+                        $returned[$year]['earned'][] = '0.00';
+                        $returned[$year]['saved'][] = '0.00';
+                        $returned[$year]['spent'][] = '0.00';
                     }
                 }
             }
 
-            return $this->respondWithOK(['budget' => $returned]);
+            return $this->respondWithOK(['aggregate' => $returned]);
         } catch (\Exception $e) {
             return $this->respondWithBadRequest([], $e->getMessage() . ': Unable to retrieve aggregation at this time');
         }
