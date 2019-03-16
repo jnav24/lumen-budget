@@ -156,6 +156,8 @@ class AuthController extends Controller
             return $this->respondWithOK();
         } catch(ValidationException $ex) {
             return $this->respondWithBadRequest($ex->errors(), 'Invalid username');
+        } catch (\Exception $ex) {
+            return $this->respondWithBadRequest([], $ex->getMessage() . ': Something unexpected happened');
         }
     }
 }
