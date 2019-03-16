@@ -20,6 +20,8 @@ class CreateUsersTable extends Migration
                 $table->string('password');
                 $table->string('remember_me')->nullable();
                 $table->integer('active', false, true)->default(0);
+                $table->string('password_reset_token', 64)->nullable();
+                $table->dateTime('password_reset_expires')->nullable();
                 $table->timestamps();
             });
         }
