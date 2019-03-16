@@ -40,6 +40,8 @@ class ForgotPasswordMailable extends Mailable
     {
         return $this->subject(env('APP_NAME', 'System') . ' password reset')
             ->from(env('MAIL_FROM_ADDRESS'), env('APP_NAME'))
+            ->replyTo(env('MAIL_REPLY_TO_ADDRESS'), env('APP_NAME'))
+            ->subject('Dime Budget Forgot My Password')
             ->view('emails.auth.forgotpassword');
     }
 }

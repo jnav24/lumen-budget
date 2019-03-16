@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Str;
@@ -44,8 +45,10 @@ class GlobalHelper
     {
         try {
             Mail::to($to)->send($mailable);
+            Log::info('Sent ' . get_class($mailable) . ' to ' . $to);
             return true;
         } catch(\Exception $ex) {
+            Log::info('Failed to send ' . get_class($mailable) . ' to ' . $to . ' error ' . $ex->getMessage() . ' ' . get_class(new Mail()));
             return false;
         }
     }
