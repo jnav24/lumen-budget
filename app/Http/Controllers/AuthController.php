@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\GlobalHelper;
 use App\Models\User;
 use App\Models\UserProfile;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\Mail\ForgotPasswordMailable;
 
 class AuthController extends Controller
 {
@@ -135,5 +137,25 @@ class AuthController extends Controller
                 'email' => $user->username,
             ] + $userProfile
         ]);
+    }
+
+    public function forgetPassword()
+    {
+        try {
+            $this->validate($this->request, [
+                'username' => 'required|email'
+            ]);
+
+            $user = User::where('username', $this->request->input('username'))->first();
+
+            if(empty($user)) {
+                return $this->respondWithBadRequest([], 'Username not found');
+            }
+
+            GlobalHelper::sendMailable($user->username, new ForgotPasswordMailable($user));
+            return $this->respondWithOK();
+        } catch(ValidationException $ex) {
+            return $this->respondWithBadRequest($ex->errors(), 'Invalid username');
+        }
     }
 }

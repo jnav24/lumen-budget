@@ -9,6 +9,7 @@ $router->get('/', function () use ($router) {
  */
 $router->post('auth/login', 'AuthController@authenticate');
 $router->post('register', 'AuthController@register');
+$router->post('auth/forgetpassword','AuthController@forgetPassword');
 
 $router->group(['middleware' => 'jwt.auth'], function ($router) {
     $router->get('auth/user', 'AuthController@currentUser');
