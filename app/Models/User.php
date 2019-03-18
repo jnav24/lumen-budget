@@ -46,4 +46,13 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var string
      */
     protected $table = 'users';
+
+    /**
+     * Get User Profiles
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class, 'user_id', 'id');
+    }
 }

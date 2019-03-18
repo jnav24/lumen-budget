@@ -146,7 +146,7 @@ class AuthController extends Controller
                 'username' => 'required|email'
             ]);
 
-            $user = User::where('username', $this->request->input('username'))->first();
+            $user = User::where('username', $this->request->input('username'))->with('profile')->first();
 
             if(empty($user)) {
                 return $this->respondWithBadRequest([], 'Username not found');
