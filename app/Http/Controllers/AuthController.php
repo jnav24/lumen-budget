@@ -157,7 +157,45 @@ class AuthController extends Controller
         } catch(ValidationException $ex) {
             return $this->respondWithBadRequest($ex->errors(), 'Invalid username');
         } catch (\Exception $ex) {
-            return $this->respondWithBadRequest([], $ex->getMessage() . ': Something unexpected happened');
+            return $this->respondWithBadRequest([], 'Unable to send forget my password');
+        }
+    }
+
+    public function resetPassword()
+    {
+        try {
+            $this->validate($this->request, [
+                'token' => 'required',
+                'password' => 'required',
+                'confirm_password' => 'required',
+            ]);
+
+            if ($this->request->input('password') !== $this->request->input('confirm_password')) {
+                return $this->respondWithBadRequest([], '');
+            }
+
+            $user = User::where('password_reset_token', $this->request->input('token'))->first();
+
+            if (empty($user)) {
+                return $this->respondWithBadRequest([], 'Invalid token.');
+            }
+
+            $currentTimestamp = GlobalHelper::setDefaultDateTimeIfNull();
+
+            if (empty($user->password_reset_token) || $currentTimestamp > $user->password_reset_token) {
+                return $this->respondWithBadRequest([], 'Token has expired');
+            }
+
+            $user->password_reset_token = null;
+            $user->password_reset_expires = null;
+            $user->password = app('hash')->make($this->request->input('password'));
+            $user->save();
+
+            return $this->respondWithOK();
+        } catch (ValidationException $ex) {
+            return $this->respondWithBadRequest($ex->errors(), 'Invalid token');
+        } catch (\Exception $ex) {
+            return $this->respondWithBadRequest([], 'Unable to reset password at this time.');
         }
     }
 }
