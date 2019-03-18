@@ -42,6 +42,6 @@ class ForgotPasswordMailable extends Mailable
             ->from(env('MAIL_FROM_ADDRESS'), env('APP_NAME'))
             ->replyTo(env('MAIL_REPLY_TO_ADDRESS'), env('APP_NAME'))
             ->subject('Dime Budget Forgot My Password')
-            ->view('emails.auth.forgotpassword');
+            ->view('emails.auth.forgetpassword');
     }
 }

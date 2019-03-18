@@ -39,17 +39,16 @@ class GlobalHelper
      *
      * @param string $to
      * @param Mailable $mailable
-     * @return bool
+     * @throws \Exception
      */
     public static function sendMailable($to, $mailable)
     {
         try {
             Mail::to($to)->send($mailable);
             Log::info('Sent ' . get_class($mailable) . ' to ' . $to);
-            return true;
-        } catch(\Exception $ex) {
-            Log::info('Failed to send ' . get_class($mailable) . ' to ' . $to . ' error ' . $ex->getMessage() . ' ' . get_class(new Mail()));
-            return false;
+        } catch (\Exception $e) {
+            Log::info('Failed to send ' . get_class($mailable) . ' to ' . $to . ' error ' . $e->getMessage());
+            throw new \Exception('Unable to send email at this time.');
         }
     }
 }
