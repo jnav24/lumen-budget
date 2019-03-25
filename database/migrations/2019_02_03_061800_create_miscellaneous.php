@@ -22,6 +22,7 @@ class CreateMiscellaneous extends Migration
                 $table->integer('due_date', false, 'unsigned');
                 $table->dateTime('paid_date');
                 $table->string('confirmation');
+                $table->tinyInteger('not_track_amount')->default(0);
                 $table->timestamps();
             });
 

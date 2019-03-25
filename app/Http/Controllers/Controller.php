@@ -100,7 +100,7 @@ class Controller extends BaseController
 
     protected function getMiscellaneousAttributes()
     {
-        return ['id', 'name', 'amount', 'due_date', 'paid_date', 'confirmation'];
+        return ['id', 'name', 'amount', 'due_date', 'paid_date', 'confirmation', 'not_track_amount'];
     }
 
     protected function getUtilitiesAttributes()
