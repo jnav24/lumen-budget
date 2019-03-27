@@ -57,3 +57,10 @@ $router->group(['middleware' => 'jwt.auth'], function ($router) {
     $router->get('current-budget-aggregate/{year}', 'BudgetAggregationController@getSingleYearAggregation');
     $router->get('unpaid-aggregate', 'BudgetAggregationController@getCountOfUnPaidBills');
 });
+
+/**
+ * User
+ */
+$router->group(['middleware' => 'jwt.auth'], function ($router) {
+   $router->post('user-profile', 'UserController@updateUserProfile');
+});
