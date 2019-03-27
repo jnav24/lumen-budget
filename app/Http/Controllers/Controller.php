@@ -69,7 +69,7 @@ class Controller extends BaseController
             $template = array_intersect_key($item, array_flip($attributes));
 
             if (!empty($template)) {
-                if (!empty($item['id']) || $this->isNotTempId($item['id'])) {
+                if (!empty($item['id']) && $this->isNotTempId($item['id'])) {
                     $savedData = array_merge($template, $date);
                     DB::table($model)->where('id', $item['id'])->update($savedData);
                 } else {
