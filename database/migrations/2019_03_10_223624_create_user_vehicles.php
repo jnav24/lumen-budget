@@ -19,7 +19,10 @@ class CreateUserVehicles extends Migration
                 $table->integer('user_id', false, 'unsigned');
                 $table->string('make');
                 $table->string('model');
-                $table->string('year');
+                $table->string('year', 4);
+                $table->string('color');
+                $table->string('license');
+                $table->tinyInteger('active')->default(1);
                 $table->timestamps();
             });
         }
