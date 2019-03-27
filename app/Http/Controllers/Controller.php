@@ -54,7 +54,7 @@ class Controller extends BaseController
      * @param array $attributes; array of column names
      * @param array $data; multidimensional array of records to be saved
      * @param int $id; foreign key id
-     * @param string; $model name of table
+     * @param string $model; name of table
      * @return array; returns the same as $data but with updated ids where necessary
      */
     protected function insertOrUpdate(array $attributes, array $data, int $id, string $model)
