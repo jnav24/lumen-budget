@@ -20,7 +20,7 @@ class Controller extends BaseController
     protected $request;
 
     /**
-     * Budget id name
+     * Foreign key name
      *
      * @var string
      */
@@ -37,11 +37,26 @@ class Controller extends BaseController
         $this->request = $request;
     }
 
+    /**
+     * Checks if id is temp id or not
+     *
+     * @param $id
+     * @return bool
+     */
     protected function isNotTempId($id)
     {
         return (stripos($id, 'temp_') === false);
     }
 
+    /**
+     * Insert or update a table in the DB
+     *
+     * @param array $attributes; array of column names
+     * @param array $data; multidimensional array of records to be saved
+     * @param int $id; foreign key id
+     * @param string; $model name of table
+     * @return array; returns the same as $data but with updated ids where necessary
+     */
     protected function insertOrUpdate(array $attributes, array $data, int $id, string $model)
     {
         $result = [];
@@ -53,21 +68,23 @@ class Controller extends BaseController
         foreach ($data as $item) {
             $template = array_intersect_key($item, array_flip($attributes));
 
-            if ($this->isNotTempId($item['id'])) {
-                $savedData = array_merge($template, $date);
-                DB::table($model)->where('id', $item['id'])->update($savedData);
-            } else {
-                unset($template['id']);
-                $date['created_at'] = Carbon::now()->format('Y-m-d H:i:s');
-                $savedData = array_merge($template, $date);
-                $id = DB::table($model)->insertGetId($savedData);
-                $savedData['id'] = $id;
-            }
+            if (!empty($template)) {
+                if (!empty($item['id']) || $this->isNotTempId($item['id'])) {
+                    $savedData = array_merge($template, $date);
+                    DB::table($model)->where('id', $item['id'])->update($savedData);
+                } else {
+                    unset($template['id']);
+                    $date['created_at'] = Carbon::now()->format('Y-m-d H:i:s');
+                    $savedData = array_merge($template, $date);
+                    $id = DB::table($model)->insertGetId($savedData);
+                    $savedData['id'] = $id;
+                }
 
-            unset($savedData[$this->tableId]);
-            unset($savedData['created_at']);
-            unset($savedData['updated_at']);
-            $result[] = $savedData;
+                unset($savedData[$this->tableId]);
+                unset($savedData['created_at']);
+                unset($savedData['updated_at']);
+                $result[] = $savedData;
+            }
         }
 
         return $result;
