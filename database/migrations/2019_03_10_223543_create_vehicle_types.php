@@ -20,6 +20,14 @@ class CreateVehicleTypes extends Migration
                 $table->string('slug');
                 $table->timestamps();
             });
+
+            DB::table('vehicle_types')->insert([
+                ['name' => 'Gas', 'slug' => 'gas', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+                ['name' => 'Finance', 'slug' => 'finance', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+                ['name' => 'Lease', 'slug' => 'lease', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+                ['name' => 'Insurance', 'slug' => 'insurance', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+                ['name' => 'Repair & Maintenance', 'slug' => 'repair-maintenance', 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()],
+            ]);
         }
     }
 
