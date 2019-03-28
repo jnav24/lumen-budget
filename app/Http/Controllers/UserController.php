@@ -30,8 +30,7 @@ class UserController extends Controller
             $profile->save();
 
             $vehicleAttributes = ['id', 'make', 'model', 'year', 'color', 'license', 'active'];
-            // $vechicles = $this->insertOrUpdate($vehicleAttributes, $this->request->input('vehicles'), $this->request->auth->id, 'user_vehicles');
-            $vehicles = [];
+            $vehicles = $this->insertOrUpdate($vehicleAttributes, $this->request->input('vehicles'), $this->request->auth->id, 'user_vehicles');
 
             return $this->respondWithOK([
                 'profile' => array_merge($profile->toArray(), ['email' => $this->request->auth->username]),

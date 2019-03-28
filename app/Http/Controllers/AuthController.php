@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\GlobalHelper;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Models\UserVehicles;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -50,6 +51,7 @@ class AuthController extends Controller
 
             if (Hash::check($this->request->input('password'), $user->password)) {
                 $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
+                $vehicles = UserVehicles::where('user_id', $user->id)->get()->toArray();
 
                 if (!$userProfile) {
                     return $this->respondWithBadRequest([], 'There is a problem with your account. Please contact the administrator.');
@@ -59,7 +61,8 @@ class AuthController extends Controller
                     'token' => $this->jwt($user),
                     'user' => [
                         'email' => $user->username,
-                    ] + $userProfile
+                    ] + $userProfile,
+                    'vehicles' => $vehicles,
                 ]);
             }
 
@@ -131,11 +134,13 @@ class AuthController extends Controller
     {
         $user = $this->request->auth;
         $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
+        $vehicles = UserVehicles::where('user_id', $user->id)->get()->toArray();
 
         return $this->respondWithOK([
-            'user' =>[
+            'user' => [
                 'email' => $user->username,
-            ] + $userProfile
+            ] + $userProfile,
+            'vehicles' => $vehicles,
         ]);
     }
 
