@@ -21,7 +21,7 @@ class CreateCreditCards extends Migration
                 $table->string('last_4');
                 $table->string('exp_month');
                 $table->string('exp_year');
-                $table->integer('apr', false, 'unsigned');
+                $table->string('apr');
                 $table->integer('due_date', false, 'unsigned');
                 $table->integer('credit_card_type_id', false, 'unsigned');
                 $table->integer('budget_id', false, 'unsigned');
@@ -53,7 +53,7 @@ class CreateCreditCards extends Migration
                 $table->string('last_4');
                 $table->string('exp_month');
                 $table->string('exp_year');
-                $table->integer('apr', false, 'unsigned');
+                $table->string('apr');
                 $table->integer('due_date', false, 'unsigned');
                 $table->integer('credit_card_type_id', false, 'unsigned');
                 $table->integer('budget_template_id', false, 'unsigned');
