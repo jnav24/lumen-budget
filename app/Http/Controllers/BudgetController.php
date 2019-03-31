@@ -362,13 +362,34 @@ class BudgetController extends Controller
 
         foreach ($intersect as $key => $value) {
             foreach ($allExpenses[$value] as $item) {
-                if (!empty($item['amount'])) {
+                if ($this->canAddAmount($item)) {
                     $total = ((float)$item['amount'] + $total);
                 }
             }
         }
 
         return number_format((float)$total, 2, '.', '');
+    }
+
+    /**
+     * Checks to see if amount can be add to the aggregate table
+     *
+     * @param array $item
+     * @return boolean
+     */
+    private function canAddAmount($item)
+    {
+        $result = false;
+
+        if (!empty($item['amount'])) {
+            $result = true;
+
+            if (!empty($item['not_track_amount'])) {
+                $result = !$item['not_track_amount'];
+            }
+        }
+
+        return $result;
     }
 
     private function saveAggregation($budgetId, $type, $total)
