@@ -186,7 +186,7 @@ class BudgetController extends Controller
      *      @value integer ['apr'] (optional)
      *      @value integer ['due_date']
      *      @value integer ['credit_card_type_id']
-     *      @value Datetime ['pay_date'] (optional)
+     *      @value Datetime ['paid_date'] (optional)
      *      @value string ['confirmation'] (optional)
      *      @value string ['amount'] (optional)
      * }
@@ -200,7 +200,7 @@ class BudgetController extends Controller
      *      @value integer ['apr']
      *      @value integer ['due_date']
      *      @value integer ['credit_card_type_id']
-     *      @value Datetime ['pay_date']
+     *      @value Datetime ['paid_date']
      *      @value string ['confirmation']
      *      @value string ['amount']
      * }
@@ -269,7 +269,7 @@ class BudgetController extends Controller
      *      @value string ['amount']
      *      @value integer ['due_date']
      *      @value integer ['medical_type_id']
-     *      @value Datetime ['pay_date'] (optional)
+     *      @value Datetime ['paid_date'] (optional)
      *      @value string ['confirmation'] (optional)
      * }
      * @return array {
@@ -278,7 +278,7 @@ class BudgetController extends Controller
      *      @value string ['amount']
      *      @value integer ['due_date']
      *      @value integer ['medical_type_id']
-     *      @value Datetime ['pay_date']
+     *      @value Datetime ['paid_date']
      *      @value string ['confirmation']
      * }
      */
@@ -297,7 +297,7 @@ class BudgetController extends Controller
      *      @value string ['name']
      *      @value string ['amount']
      *      @value integer ['due_date']
-     *      @value Datetime ['pay_date'] (optional)
+     *      @value Datetime ['paid_date'] (optional)
      *      @value string ['confirmation'] (optional)
      * }
      * @return array {
@@ -305,7 +305,7 @@ class BudgetController extends Controller
      *      @value string ['name']
      *      @value string ['amount']
      *      @value integer ['due_date']
-     *      @value Datetime ['pay_date']
+     *      @value Datetime ['paid_date']
      *      @value string ['confirmation']
      * }
      */
@@ -325,7 +325,7 @@ class BudgetController extends Controller
      *      @value string ['amount']
      *      @value integer ['due_date']
      *      @value integer ['utility_type_id']
-     *      @value Datetime ['pay_date'] (optional)
+     *      @value Datetime ['paid_date'] (optional)
      *      @value string ['confirmation'] (optional)
      * }
      * @return array {
@@ -334,7 +334,7 @@ class BudgetController extends Controller
      *      @value string ['amount']
      *      @value integer ['due_date']
      *      @value integer ['utility_type_id']
-     *      @value Datetime ['pay_date']
+     *      @value Datetime ['paid_date']
      *      @value string ['confirmation']
      * }
      */
@@ -342,6 +342,37 @@ class BudgetController extends Controller
     {
         $attributes = $this->getUtilitiesAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'utilities');
+    }
+
+    /**
+     * Saves vehicles; called dynamically from saveBudget()
+     *
+     * @param integer $id budget id; foreign key
+     * @param array $expenses {
+     *      @value integer ['id'] (optional)
+     *      @value string ['mileage']
+     *      @value string ['amount']
+     *      @value integer ['due_date']
+     *      @value integer ['user_vehicle_id']
+     *      @value integer ['vehicle_type_id']
+     *      @value Datetime ['paid_date'] (optional)
+     *      @value string ['confirmation'] (optional)
+     * }
+     * @return array {
+     *      @value integer ['id']
+     *      @value string ['mileage']
+     *      @value string ['amount']
+     *      @value integer ['due_date']
+     *      @value integer ['user_vehicle_id']
+     *      @value integer ['vehicle_type_id']
+     *      @value Datetime ['paid_date']
+     *      @value string ['confirmation']
+     * }
+     */
+    private function save_vehicles($id, $expenses)
+    {
+        $attributes = $this->getVehiclesAttributes();
+        return $this->insertOrUpdate($attributes, $expenses, $id, 'vehicles');
     }
 
     private function setupAndSaveAggregation($budgetId, $allExpenses)
