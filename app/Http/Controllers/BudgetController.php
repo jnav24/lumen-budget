@@ -45,6 +45,7 @@ class BudgetController extends Controller
                 ->with('medical')
                 ->with('miscellaneous')
                 ->with('utilities')
+                ->with('vehicles')
                 ->first();
 
             return $this->respondWithOK([
@@ -60,6 +61,7 @@ class BudgetController extends Controller
                         'medical' => $data['medical'],
                         'miscellaneous' => $data['miscellaneous'],
                         'utilities' => $data['utilities'],
+                        'vehicles' => $data['vehicles'],
                     ],
                 ],
             ]);

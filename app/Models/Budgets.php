@@ -96,4 +96,14 @@ class Budgets extends Model
     {
         return $this->hasMany(Utilities::class, 'budget_id', 'id');
     }
+
+    /**
+     * Vehicles
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function vehicles()
+    {
+        return $this->hasMany(Vehicles::class, 'budget_id', 'id');
+    }
 }
