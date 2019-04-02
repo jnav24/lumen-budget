@@ -19,7 +19,7 @@ class BudgetController extends Controller
 {
     protected $tableId = 'budget_id';
     private $earned = ['jobs'];
-    private $spent = ['credit_cards', 'medical', 'miscellaneous', 'utilities'];
+    private $spent = ['credit_cards', 'medical', 'miscellaneous', 'utilities', 'vehicles'];
 
     public function getAllBudgets()
     {
