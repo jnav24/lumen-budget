@@ -142,6 +142,7 @@ class BudgetController extends Controller
             Medical::where($this->tableId, $id)->delete();
             Miscellaneous::where($this->tableId, $id)->delete();
             Utilities::where($this->tableId, $id)->delete();
+            Vehicles::where($this->tableId, $id)->delete();
             Budgets::find($id)->delete();
             return $this->respondWithOK([]);
         } catch (\Exception $e) {
