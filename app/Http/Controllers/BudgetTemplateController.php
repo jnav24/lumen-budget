@@ -51,6 +51,7 @@ class BudgetTemplateController extends Controller
                 ->with('medical')
                 ->with('miscellaneous')
                 ->with('utilities')
+                ->with('vehicles')
                 ->first()
                 ->toArray();
 
@@ -69,6 +70,7 @@ class BudgetTemplateController extends Controller
                         'medical' => $data['medical'],
                         'miscellaneous' => $data['miscellaneous'],
                         'utilities' => $data['utilities'],
+                        'vehicles' => $data['vehicles'],
                     ]
                 ],
             ];
