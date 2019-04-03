@@ -12,6 +12,7 @@ use App\Models\JobTypes;
 use App\Models\Medical;
 use App\Models\Miscellaneous;
 use App\Models\Utilities;
+use App\Models\Vehicles;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
