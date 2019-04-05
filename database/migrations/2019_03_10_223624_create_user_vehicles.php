@@ -25,6 +25,13 @@ class CreateUserVehicles extends Migration
                 $table->tinyInteger('active')->default(1);
                 $table->timestamps();
             });
+
+            Schema::table('user_vehicles', function (Blueprint $table) {
+                $table->foreign('user_id')
+                    ->references('id')
+                    ->on('users')
+                    ->onDelete('cascade');
+            });
         }
     }
 

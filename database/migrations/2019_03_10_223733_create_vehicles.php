@@ -26,6 +26,23 @@ class CreateVehicles extends Migration
                 $table->string('confirmation');
                 $table->timestamps();
             });
+
+            Schema::table('vehicles', function(Blueprint $table) {
+                $table->foreign('budget_id')
+                    ->references('id')
+                    ->on('budgets')
+                    ->onDelete('cascade');
+
+                $table->foreign('user_vehicle_id')
+                    ->references('id')
+                    ->on('user_vehicles')
+                    ->onDelete('cascade');
+
+                $table->foreign('vehicle_type_id')
+                    ->references('id')
+                    ->on('vehicle_types')
+                    ->onDelete('cascade');
+            });
         }
 
         if (!Schema::hasTable('vehicle_templates')) {
@@ -38,6 +55,23 @@ class CreateVehicles extends Migration
                 $table->integer('user_vehicle_id', false, 'unsigned');
                 $table->integer('vehicle_type_id', false, 'unsigned');
                 $table->timestamps();
+            });
+
+            Schema::table('vehicle_templates', function(Blueprint $table) {
+                $table->foreign('budget_template_id')
+                    ->references('id')
+                    ->on('budget_templates')
+                    ->onDelete('cascade');
+
+                $table->foreign('user_vehicle_id')
+                    ->references('id')
+                    ->on('user_vehicles')
+                    ->onDelete('cascade');
+
+                $table->foreign('vehicle_type_id')
+                    ->references('id')
+                    ->on('vehicle_types')
+                    ->onDelete('cascade');
             });
         }
     }
