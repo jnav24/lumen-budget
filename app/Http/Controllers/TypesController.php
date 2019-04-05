@@ -9,6 +9,7 @@ use App\Models\InvestmentTypes;
 use App\Models\JobTypes;
 use App\Models\MedicalTypes;
 use App\Models\UtilityTypes;
+use App\Models\VehicleTypes;
 
 class TypesController extends Controller
 {
@@ -35,7 +36,7 @@ class TypesController extends Controller
     public function bill()
     {
         try {
-            $types = ['types' => BillTypes::all()->toArray()];
+            $types = ['types' => BillTypes::orderBy('slug')->get()->toArray()];
             return $this->respondWithOK($types);
         } catch (\Exception $e) {
             return $this->respondWithBadRequest([], 'Unable to retrieve bill types at this time.');
@@ -114,6 +115,21 @@ class TypesController extends Controller
             return $this->respondWithOK($types);
         } catch (\Exception $e) {
             return $this->respondWithBadRequest([], 'Unable to retrieve utility types at this time.');
+        }
+    }
+
+    /**
+     * Get Vehicle Types
+     *
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
+    public function vehicle()
+    {
+        try {
+            $types = ['types' => VehicleTypes::all()->toArray()];
+            return $this->respondWithOK($types);
+        } catch (\Exception $e) {
+            return $this->respondWithBadRequest([], 'Unable to retrieve vehicle types at this time.');
         }
     }
 }

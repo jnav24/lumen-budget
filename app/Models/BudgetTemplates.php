@@ -82,4 +82,14 @@ class BudgetTemplates extends Model
     {
         return $this->hasMany('App\Models\UtilityTemplates', 'budget_template_id', 'id');
     }
+
+    /**
+     * Vehicles Template
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function vehicles()
+    {
+        return $this->hasMany('App\Models\VehicleTemplates', 'budget_template_id', 'id');
+    }
 }

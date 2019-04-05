@@ -10,6 +10,7 @@ use App\Models\JobTemplates;
 use App\Models\MedicalTemplates;
 use App\Models\MiscellaneousTemplates;
 use App\Models\UtilityTemplates;
+use App\Models\VehicleTemplates;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
@@ -51,6 +52,7 @@ class BudgetTemplateController extends Controller
                 ->with('medical')
                 ->with('miscellaneous')
                 ->with('utilities')
+                ->with('vehicles')
                 ->first()
                 ->toArray();
 
@@ -69,6 +71,7 @@ class BudgetTemplateController extends Controller
                         'medical' => $data['medical'],
                         'miscellaneous' => $data['miscellaneous'],
                         'utilities' => $data['utilities'],
+                        'vehicles' => $data['vehicles'],
                     ]
                 ],
             ];
@@ -209,6 +212,19 @@ class BudgetTemplateController extends Controller
     }
 
     /**
+     * Dynamic method called from deleteBudgetTemplate()
+     *
+     * @param int $id
+     * @throws \Exception
+     */
+    private function delete_vehicles_templates(int $id)
+    {
+        if (empty(VehicleTemplates::find($id)->delete())) {
+            throw new \Exception();
+        }
+    }
+
+    /**
      * Dynamic method called from saveBudgetTemplates()
      *
      * @param $expenses
@@ -297,5 +313,18 @@ class BudgetTemplateController extends Controller
     {
         $attributes = $this->getUtilitiesAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'utility_templates');
+    }
+
+    /**
+     * Dynamic method called from saveBudgetTemplates()
+     *
+     * @param $expenses
+     * @param $id
+     * @return array
+     */
+    private function vehicles_templates($expenses, $id)
+    {
+        $attributes = $this->getVehiclesAttributes();
+        return $this->insertOrUpdate($attributes, $expenses, $id, 'vehicle_templates');
     }
 }

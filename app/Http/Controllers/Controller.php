@@ -124,4 +124,9 @@ class Controller extends BaseController
     {
         return ['id', 'name', 'amount', 'due_date', 'utility_type_id', 'paid_date', 'confirmation'];
     }
+
+    protected function getVehiclesAttributes()
+    {
+        return ['id', 'mileage', 'amount', 'due_date', 'user_vehicle_id', 'vehicle_type_id', 'paid_date', 'confirmation'];
+    }
 }
