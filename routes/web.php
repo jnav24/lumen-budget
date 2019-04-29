@@ -65,4 +65,3 @@ $router->group(['middleware' => 'jwt.auth'], function ($router) {
 $router->group(['middleware' => 'jwt.auth'], function ($router) {
    $router->post('user-profile', 'UserController@updateUserProfile');
 });
-// hello?
