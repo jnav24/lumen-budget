@@ -212,12 +212,14 @@ class AuthController extends Controller
                 'oldPassword' => 'required',
             ]);
 
-            $user = User::where('password', app('hash')->make($this->request->input('oldPassword')))
-                ->where('user_id', $this->request->auth->id)
-                ->first();
+            $user = User::where('id', $this->request->auth->id)->first();
 
             if (empty($user)) {
                 return $this->respondWithBadRequest([], 'User does not exist');
+            }
+
+            if (!Hash::check($this->request->input('oldPassword'), $user->password)) {
+                return $this->respondWithBadRequest([], 'User password is incorrect');
             }
 
             $user->password = app('hash')->make($this->request->input('newPassword'));
@@ -227,7 +229,7 @@ class AuthController extends Controller
         } catch (ValidationException $e) {
             return $this->respondWithBadRequest($e->errors(), 'Validation errors');
         } catch (\Exception $e) {
-            return $this->respondWithBadRequest([], '');
+            return $this->respondWithBadRequest([], 'Something went wrong. Try again later.');
         }
     }
 
