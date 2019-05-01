@@ -15,6 +15,7 @@ $router->post('auth/validatepasswordresettoken','AuthController@validateResetPas
 
 $router->group(['middleware' => 'jwt.auth'], function ($router) {
     $router->get('auth/user', 'AuthController@currentUser');
+    $router->get('auth/update-password', 'AuthController@updatePassword');
 });
 
 /**
