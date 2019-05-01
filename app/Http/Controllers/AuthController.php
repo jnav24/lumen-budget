@@ -204,6 +204,35 @@ class AuthController extends Controller
         }
     }
 
+    public function updatePassword()
+    {
+        try {
+            $this->validate($this->request, [
+                'newPassword' => 'required',
+                'oldPassword' => 'required',
+            ]);
+
+            $user = User::where('id', $this->request->auth->id)->first();
+
+            if (empty($user)) {
+                return $this->respondWithBadRequest([], 'User does not exist');
+            }
+
+            if (!Hash::check($this->request->input('oldPassword'), $user->password)) {
+                return $this->respondWithBadRequest([], 'User password is incorrect');
+            }
+
+            $user->password = app('hash')->make($this->request->input('newPassword'));
+            $user->save();
+
+            return $this->respondWithOK();
+        } catch (ValidationException $e) {
+            return $this->respondWithBadRequest($e->errors(), 'Validation errors');
+        } catch (\Exception $e) {
+            return $this->respondWithBadRequest([], 'Something went wrong. Try again later.');
+        }
+    }
+
     public function validateResetPasswordToken()
     {
         try {
