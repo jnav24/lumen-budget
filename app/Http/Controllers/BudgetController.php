@@ -484,6 +484,27 @@ class BudgetController extends Controller
     }
 
     /**
+     * Get weekly pay periods for a billing cycle; called dynamically from generatePaidExpenses()
+     *
+     * @param array $job {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     * @param Carbon $startPay
+     * @param Carbon $currentMonth
+     * @return array {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     */
+    private function get_weekly($job, $startPay, $currentMonth)
+    {}
+
+    /**
      * Get bi-weekly pay periods for a billing cycle; called dynamically from generatePaidExpenses()
      *
      * @param array $job {
@@ -543,6 +564,48 @@ class BudgetController extends Controller
 
         return $results;
     }
+
+    /**
+     * Get semi-monthly pay periods for a billing cycle; called dynamically from generatePaidExpenses()
+     *
+     * @param array $job {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     * @param Carbon $startPay
+     * @param Carbon $currentMonth
+     * @return array {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     */
+    private function get_semi_monthly($job, $startPay, $currentMonth)
+    {}
+
+    /**
+     * Get monthly pay periods for a billing cycle; called dynamically from generatePaidExpenses()
+     *
+     * @param array $job {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     * @param Carbon $startPay
+     * @param Carbon $currentMonth
+     * @return array {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     */
+    private function get_monthly($job, $startPay, $currentMonth)
+    {}
 
     /**
      * Get one time payment billing cycle; called dynamically from generatePaidExpenses()
