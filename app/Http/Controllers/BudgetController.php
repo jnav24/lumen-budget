@@ -484,6 +484,24 @@ class BudgetController extends Controller
     }
 
     /**
+     * @deprecated Marked for deletion
+     */
+    public function test()
+    {
+        $job = [
+            'id' => 1,
+            'name' => 'Big Pimp\'n',
+            'amount' => '15325.24',
+            'job_type_id' => 1,
+            'initial_pay_date' => '2018-12-01',
+        ];
+        $startPay = Carbon::createFromTimeString('2019-02-01 00:00:00');
+        $currentMonth = Carbon::createFromTimeString('2019-03-01 00:00:00');
+
+        dd($this->get_monthly($job, $startPay, $currentMonth));
+    }
+
+    /**
      * Get weekly pay periods for a billing cycle; called dynamically from generatePaidExpenses()
      *
      * @param array $job {
@@ -502,7 +520,11 @@ class BudgetController extends Controller
      * }
      */
     private function get_weekly($job, $startPay, $currentMonth)
-    {}
+    {
+        $results = [];
+
+        return $results;
+    }
 
     /**
      * Get bi-weekly pay periods for a billing cycle; called dynamically from generatePaidExpenses()
@@ -584,7 +606,11 @@ class BudgetController extends Controller
      * }
      */
     private function get_semi_monthly($job, $startPay, $currentMonth)
-    {}
+    {
+        $results = [];
+
+        return $results;
+    }
 
     /**
      * Get monthly pay periods for a billing cycle; called dynamically from generatePaidExpenses()
@@ -605,7 +631,24 @@ class BudgetController extends Controller
      * }
      */
     private function get_monthly($job, $startPay, $currentMonth)
-    {}
+    {
+        $newPayPeriod = $startPay->addMonth();
+        $date = $newPayPeriod;
+
+        if ($newPayPeriod->format('Y-m') !== $currentMonth->format('Y-m')) {
+            $day = $startPay->format('d');
+            $currentCycle = $currentMonth->format('Y-m');
+            $date = Carbon::createFromTimeString($currentCycle . '-' . $day . ' 00:00:00');
+        }
+
+        return [
+            'id' => $job['id'],
+            'name' => $job['name'],
+            'amount' => $job['amount'],
+            'job_type_id' => $job['job_type_id'],
+            'initial_pay_date' => $date->toDateTimeString(),
+        ];
+    }
 
     /**
      * Get one time payment billing cycle; called dynamically from generatePaidExpenses()
