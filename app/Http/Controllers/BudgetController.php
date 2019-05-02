@@ -496,9 +496,10 @@ class BudgetController extends Controller
             'initial_pay_date' => '2018-12-01',
         ];
         $startPay = Carbon::createFromTimeString('2019-02-01 00:00:00');
-        $currentMonth = Carbon::createFromTimeString('2019-03-01 00:00:00');
+        $currentMonth = Carbon::createFromTimeString('2019-04-01 00:00:00');
 
-        dd($this->get_monthly($job, $startPay, $currentMonth));
+//        dd($currentMonth->endOfMonth()->toDateString());
+        dd($this->get_semi_monthly($job, $startPay, $currentMonth));
     }
 
     /**
@@ -608,6 +609,15 @@ class BudgetController extends Controller
     private function get_semi_monthly($job, $startPay, $currentMonth)
     {
         $results = [];
+        $dates = [
+            $currentMonth->format('Y-m') . '-15 00:00:00',
+            $currentMonth->endOfMonth()->toDateTimeString(),
+        ];
+
+        foreach ($dates as $date) {
+            $job['initial_pay_date'] = $date;
+            $results[] = $job;
+        }
 
         return $results;
     }
