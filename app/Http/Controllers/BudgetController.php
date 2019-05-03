@@ -495,17 +495,17 @@ class BudgetController extends Controller
             'job_type_id' => 1,
             'initial_pay_date' => '2018-12-01',
         ];
-        $startPay = Carbon::createFromTimeString('2019-02-01 00:00:00');
-        $currentMonth = Carbon::createFromTimeString('2019-04-01 00:00:00');
+        $startPay = Carbon::createFromTimeString('2018-04-27 00:00:00');
+        $currentMonth = Carbon::createFromTimeString('2019-07-01 00:00:00');
 
-//        dd($currentMonth->endOfMonth()->toDateString());
-        dd($this->get_semi_monthly($job, $startPay, $currentMonth));
+        dd($this->get_weekly($job, $startPay, $currentMonth));
     }
 
     /**
      * Get weekly pay periods for a billing cycle; called dynamically from generatePaidExpenses()
      *
      * @param array $job {
+     *      @value integer | string ['id']
      *      @value string ['name']
      *      @value string ['amount']
      *      @value integer ['job_type_id']
@@ -514,6 +514,7 @@ class BudgetController extends Controller
      * @param Carbon $startPay
      * @param Carbon $currentMonth
      * @return array {
+     *      @value integer | string ['id']
      *      @value string ['name']
      *      @value string ['amount']
      *      @value integer ['job_type_id']
@@ -523,6 +524,35 @@ class BudgetController extends Controller
     private function get_weekly($job, $startPay, $currentMonth)
     {
         $results = [];
+
+        $day = $startPay->format('D');
+        $month = $currentMonth->format('M');
+        $initialDate = $startPay;
+
+        for ($i = 1; $i < 8; $i++) {
+            $date = Carbon::createFromTimeString($currentMonth->format('Y-m') . '-0' . $i .' 00:00:00');
+
+            if ($date->format('D') === $day) {
+                $initialDate = $date;
+            }
+        }
+
+        $currentMonthWeek = $currentMonth->weekOfYear;
+        $nextMonthWeek = $currentMonth->addMonth()->weekOfYear;
+
+        for ($i = 0; $i <= ($nextMonthWeek-$currentMonthWeek); $i++) {
+            if ($initialDate->format('M') === $month) {
+                $results[] = [
+                    'id' => $job['id'],
+                    'name' => $job['name'],
+                    'amount' => $job['amount'],
+                    'job_type_id' => $job['job_type_id'],
+                    'initial_pay_date' => $initialDate->toDateTimeString(),
+                ];
+            }
+
+            $initialDate->addDays(7);
+        }
 
         return $results;
     }
