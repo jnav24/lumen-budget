@@ -484,24 +484,6 @@ class BudgetController extends Controller
     }
 
     /**
-     * @deprecated Marked for deletion
-     */
-    public function test()
-    {
-        $job = [
-            'id' => 1,
-            'name' => 'Big Pimp\'n',
-            'amount' => '15325.24',
-            'job_type_id' => 1,
-            'initial_pay_date' => '2018-12-01',
-        ];
-        $startPay = Carbon::createFromTimeString('2018-04-27 00:00:00');
-        $currentMonth = Carbon::createFromTimeString('2019-07-01 00:00:00');
-
-        dd($this->get_weekly($job, $startPay, $currentMonth));
-    }
-
-    /**
      * Get weekly pay periods for a billing cycle; called dynamically from generatePaidExpenses()
      *
      * @param array $job {
