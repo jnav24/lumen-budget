@@ -581,27 +581,46 @@ class BudgetController extends Controller
     {
         $results = [];
 
-        $totalWeeks = ($currentMonth->weekOfYear - $startPay->weekOfYear);
         $nextMonth = Carbon::createFromTimeString($this->request->input('cycle'))->addMonth();
+        $endWeek = $nextMonth->weekOfYear;
+        $startWeek = $currentMonth->weekOfYear;
         $payWeek = clone $currentMonth;
+
+        $addDays = ($startPay->dayOfWeek - $payWeek->dayOfWeek);
+
+        if ($startPay->dayOfWeek < $payWeek->dayOfWeek) {
+            $addDays = (7 - $payWeek->dayOfWeek) + $startPay->dayOfWeek;
+        }
+
+        $payWeek->addDays($addDays);
+        $totalWeeks = ($payWeek->weekOfYear - $startPay->weekOfYear);
 
         if ($totalWeeks % 2) {
             $payWeek->addDays(7);
         }
 
-        $payWeek->addDays($startPay->dayOfWeek - $payWeek->dayOfWeek);
+        if ($currentMonth->format('M') === 'Dec') {
+            $endWeek = 52;
+        }
 
-        $return = [
-            'total' => $totalWeeks,
-            'next_month' => $nextMonth,
-            'pay_week' => $payWeek,
-            'results' => $results,
-            'next_month_week' => $nextMonth->weekOfYear,
-            'pay_week_week' => $payWeek->weekOfYear,
-            'week_difference' => (($nextMonth->weekOfYear - $payWeek->weekOfYear) + 0),
-        ];
+//        $return = [
+//            'start' => $startPay,
+//            'start_day' => $startPay->dayOfWeek,
+//            'total' => $totalWeeks,
+//            'next_month' => $nextMonth,
+//            'pay_week' => $payWeek,
+//            'pay_day' => $payWeek->dayOfWeek,
+//            'results' => $results,
+//            'next_month_week' => $nextMonth->weekOfYear,
+//            'pay_week_week' => $payWeek->weekOfYear,
+//            'week_difference' => (($nextMonth->weekOfYear - $payWeek->weekOfYear) + 0),
+//            'current' => $currentMonth->format('M'),
+//            'hello' => $startWeek,
+//            'current_week' => $currentMonth->endOfMonth()->subDays(7)->weekOfYear,
+//            'pay' => $payWeek->format('M'),
+//        ]; // delete
 
-        for ($i = 0; $i <= ($nextMonth->weekOfYear - $currentMonth->weekOfYear); $i = ($i+2)) {
+        for ($i = 0; $i <= ($endWeek - $startWeek); $i = ($i+2)) {
             if ($currentMonth->format('M') === $payWeek->format('M')) {
                 $results[] = [
                     'id' => $job['id'],
@@ -610,35 +629,13 @@ class BudgetController extends Controller
                     'job_type_id' => $job['job_type_id'],
                     'initial_pay_date' => $payWeek->toDateTimeString(),
                     'int' => $i,
-                    'current' => $currentMonth->format('M'),
-                    'pay' => $payWeek->format('M'),
                 ];
                 $payWeek->addDays(14);
             }
         }
 
-        $return['results'] = $results;
-        return $return;
-
-        for ($i = 0; $i < ($nextMonth->weekOfYear - $payWeek->weekOfYear); $i = ($i+2)) {
-            if ($i === 0) {
-                continue;
-            }
-
-            $payWeek->addDays(14);
-
-            if ($currentMonth->format('M') === $payWeek->format('M')) {
-                $results[] = [
-                    'id' => $job['id'],
-                    'name' => $job['name'],
-                    'amount' => $job['amount'],
-                    'job_type_id' => $job['job_type_id'],
-                    'initial_pay_date' => $payWeek->toDateTimeString(),
-                ];
-            }
-
-        }
-
+//        $return['results'] = $results; // delete
+//        return $return; // delete
         return $results;
     }
 
