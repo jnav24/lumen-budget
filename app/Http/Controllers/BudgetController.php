@@ -159,7 +159,7 @@ class BudgetController extends Controller
                     'id' => 3,
                     'name' => 'Budget, Inc',
                     'amount' => '13152.37',
-                    'job_type_id' => 2,
+                    'job_type_id' => 1,
                     'initial_pay_date' => '2019-01-11 00:00:00',
                 ],
             ];
@@ -539,7 +539,12 @@ class BudgetController extends Controller
         }
 
         $currentMonthWeek = $currentMonth->weekOfYear;
-        $nextMonthWeek = $currentMonth->addMonth()->weekOfYear;
+
+        if ($currentMonth->format('M') === 'Dec') {
+            $nextMonthWeek = 52;
+        } else {
+            $nextMonthWeek = $currentMonth->addMonth()->weekOfYear;
+        }
 
         for ($i = 0; $i <= ($nextMonthWeek-$currentMonthWeek); $i++) {
             if ($initialDate->format('M') === $month) {
