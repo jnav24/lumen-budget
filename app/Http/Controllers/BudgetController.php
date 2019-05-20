@@ -603,23 +603,6 @@ class BudgetController extends Controller
             $endWeek = 52;
         }
 
-//        $return = [
-//            'start' => $startPay,
-//            'start_day' => $startPay->dayOfWeek,
-//            'total' => $totalWeeks,
-//            'next_month' => $nextMonth,
-//            'pay_week' => $payWeek,
-//            'pay_day' => $payWeek->dayOfWeek,
-//            'results' => $results,
-//            'next_month_week' => $nextMonth->weekOfYear,
-//            'pay_week_week' => $payWeek->weekOfYear,
-//            'week_difference' => (($nextMonth->weekOfYear - $payWeek->weekOfYear) + 0),
-//            'current' => $currentMonth->format('M'),
-//            'hello' => $startWeek,
-//            'current_week' => $currentMonth->endOfMonth()->subDays(7)->weekOfYear,
-//            'pay' => $payWeek->format('M'),
-//        ]; // delete
-
         for ($i = 0; $i <= ($endWeek - $startWeek); $i = ($i+2)) {
             if ($currentMonth->format('M') === $payWeek->format('M')) {
                 $results[] = [
@@ -634,8 +617,6 @@ class BudgetController extends Controller
             }
         }
 
-//        $return['results'] = $results; // delete
-//        return $return; // delete
         return $results;
     }
 
