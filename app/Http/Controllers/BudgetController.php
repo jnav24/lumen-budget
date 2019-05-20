@@ -151,25 +151,6 @@ class BudgetController extends Controller
         }
     }
 
-    public function test()
-    {
-        try {
-            $expenses = [
-                [
-                    'id' => 3,
-                    'name' => 'Budget, Inc',
-                    'amount' => '13152.37',
-                    'job_type_id' => 1,
-                    'initial_pay_date' => '2019-01-11 00:00:00',
-                ],
-            ];
-            $results = $this->generatePaidExpenses($expenses);
-            return $this->respondWithOK(['results' => $results]);
-        } catch (\Exception $e) {
-            return $this->respondWithBadRequest([], $e->getMessage() . ': uh oh');
-        }
-    }
-
     /**
      * Saves banks info; called dynamically from saveBudget()
      *
