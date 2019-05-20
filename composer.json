@@ -9,6 +9,7 @@
         "ext-curl": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
+        "doctrine/dbal": "^2.9",
         "firebase/php-jwt": "^5.0",
         "guzzlehttp/guzzle": "^6.3",
         "illuminate/mail": "^5.7",
