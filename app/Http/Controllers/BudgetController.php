@@ -151,6 +151,25 @@ class BudgetController extends Controller
         }
     }
 
+    public function test()
+    {
+        try {
+            $expenses = [
+                [
+                    'id' => 3,
+                    'name' => 'Budget, Inc',
+                    'amount' => '13152.37',
+                    'job_type_id' => 2,
+                    'initial_pay_date' => '2019-01-11 00:00:00',
+                ],
+            ];
+            $results = $this->generatePaidExpenses($expenses);
+            return $this->respondWithOK(['results' => $results]);
+        } catch (\Exception $e) {
+            return $this->respondWithBadRequest([], $e->getMessage() . ': uh oh');
+        }
+    }
+
     /**
      * Saves banks info; called dynamically from saveBudget()
      *
@@ -543,6 +562,7 @@ class BudgetController extends Controller
      * Get bi-weekly pay periods for a billing cycle; called dynamically from generatePaidExpenses()
      *
      * @param array $job {
+     *      @value string ['id']; a temp id is expected
      *      @value string ['name']
      *      @value string ['amount']
      *      @value integer ['job_type_id']
@@ -563,20 +583,42 @@ class BudgetController extends Controller
 
         $totalWeeks = ($currentMonth->weekOfYear - $startPay->weekOfYear);
         $nextMonth = Carbon::createFromTimeString($this->request->input('cycle'))->addMonth();
-        $payWeek = $currentMonth;
+        $payWeek = clone $currentMonth;
 
         if ($totalWeeks % 2) {
             $payWeek->addDays(7);
         }
 
         $payWeek->addDays($startPay->dayOfWeek - $payWeek->dayOfWeek);
-        $results[] = [
-            'id' => $job['id'],
-            'name' => $job['name'],
-            'amount' => $job['amount'],
-            'job_type_id' => $job['job_type_id'],
-            'initial_pay_date' => $payWeek->toDateTimeString(),
+
+        $return = [
+            'total' => $totalWeeks,
+            'next_month' => $nextMonth,
+            'pay_week' => $payWeek,
+            'results' => $results,
+            'next_month_week' => $nextMonth->weekOfYear,
+            'pay_week_week' => $payWeek->weekOfYear,
+            'week_difference' => (($nextMonth->weekOfYear - $payWeek->weekOfYear) + 0),
         ];
+
+        for ($i = 0; $i <= ($nextMonth->weekOfYear - $currentMonth->weekOfYear); $i = ($i+2)) {
+            if ($currentMonth->format('M') === $payWeek->format('M')) {
+                $results[] = [
+                    'id' => $job['id'],
+                    'name' => $job['name'],
+                    'amount' => $job['amount'],
+                    'job_type_id' => $job['job_type_id'],
+                    'initial_pay_date' => $payWeek->toDateTimeString(),
+                    'int' => $i,
+                    'current' => $currentMonth->format('M'),
+                    'pay' => $payWeek->format('M'),
+                ];
+                $payWeek->addDays(14);
+            }
+        }
+
+        $return['results'] = $results;
+        return $return;
 
         for ($i = 0; $i < ($nextMonth->weekOfYear - $payWeek->weekOfYear); $i = ($i+2)) {
             if ($i === 0) {
