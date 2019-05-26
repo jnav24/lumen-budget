@@ -127,6 +127,6 @@ class Controller extends BaseController
 
     protected function getVehiclesAttributes()
     {
-        return ['id', 'mileage', 'amount', 'due_date', 'user_vehicle_id', 'vehicle_type_id', 'paid_date', 'confirmation'];
+        return ['id', 'mileage', 'amount', 'due_date', 'user_vehicle_id', 'vehicle_type_id', 'paid_date', 'confirmation', 'not_track_amount'];
     }
 }
