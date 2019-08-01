@@ -112,7 +112,7 @@ class Controller extends BaseController
 
     protected function getMedicalAttributes()
     {
-        return ['id', 'name', 'amount', 'due_date', 'medical_type_id', 'paid_date', 'confirmation'];
+        return ['id', 'name', 'amount', 'due_date', 'medical_type_id', 'paid_date', 'confirmation', 'not_track_amount'];
     }
 
     protected function getMiscellaneousAttributes()
