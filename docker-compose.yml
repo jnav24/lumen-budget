@@ -10,6 +10,8 @@ services:
       MYSQL_DATABASE: budget
       MYSQL_USER: budget
       MYSQL_PASSWORD: budget
+    volumes:
+      - ~/.docker/data/lumen-budget:/var/lib/mysql
   proxy:
     build:
       context: .
