@@ -13,7 +13,7 @@ class RegisterUserCommand extends Command
     protected $signature = 'create:user {--F|first=} {--L|last=} {--E|email=} {--P|password=}';
     protected $description = 'Creates a user in the DB';
 
-    public function handle()
+    public function handle(): void
     {
         try {
             DB::transaction(function () {
@@ -25,7 +25,8 @@ class RegisterUserCommand extends Command
         }
     }
 
-    public function createUser() {
+    public function createUser(): void
+    {
         $faker = Faker::create();
 
         if (empty($this->option('email'))) {
