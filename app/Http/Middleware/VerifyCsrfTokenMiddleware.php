@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\Cookie;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Session\TokenMismatchException;
@@ -12,14 +14,14 @@ class VerifyCsrfTokenMiddleware {
     /**
      * The encrypter implementation.
      *
-     * @var \Illuminate\Contracts\Encryption\Encrypter
+     * @var Encrypter
      */
     protected $encrypter;
 
     /**
      * Create a new middleware instance.
      *
-     * @param  \Illuminate\Contracts\Encryption\Encrypter  $encrypter
+     * @param Encrypter $encrypter
      * @return void
      */
     public function __construct(Encrypter $encrypter) {
@@ -29,11 +31,11 @@ class VerifyCsrfTokenMiddleware {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param  Request  $request
+     * @param Closure $next
      * @return mixed
      *
-     * @throws \Illuminate\Session\TokenMismatchException
+     * @throws TokenMismatchException
      */
     public function handle($request, Closure $next) {
         if ($this->isReading($request) || $this->tokensMatch($request)) {
@@ -47,7 +49,7 @@ class VerifyCsrfTokenMiddleware {
     /**
      * Determine if the session and input CSRF tokens match.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return bool
      */
     protected function tokensMatch($request) {
@@ -63,9 +65,9 @@ class VerifyCsrfTokenMiddleware {
     /**
      * Add the CSRF token to the response cookies.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Illuminate\Http\Response  $response
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @param  Response  $response
+     * @return Response
      */
     protected function addCookieToResponse($request, $response) {
         $response->headers->setCookie(
@@ -78,7 +80,7 @@ class VerifyCsrfTokenMiddleware {
     /**
      * Determine if the HTTP request uses a ‘read’ verb.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return bool
      */
     protected function isReading($request) {
