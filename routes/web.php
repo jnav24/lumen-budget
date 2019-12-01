@@ -7,12 +7,15 @@ $router->get('/', function () use ($router) {
 /**
  * User Auth
  */
-$router->post('auth/login', 'AuthController@authenticate');
 $router->get('auth/csrf', 'AuthController@csrf');
-$router->post('register', 'AuthController@register');
-$router->post('auth/forgetpassword','AuthController@forgetPassword');
-$router->post('auth/resetpassword','AuthController@resetPassword');
-$router->post('auth/validatepasswordresettoken','AuthController@validateResetPasswordToken');
+
+$router->group(['middleware' => 'csrf'], function ($router) {
+    $router->post('auth/login', 'AuthController@authenticate');
+    $router->post('register', 'AuthController@register');
+    $router->post('auth/forgetpassword','AuthController@forgetPassword');
+    $router->post('auth/resetpassword','AuthController@resetPassword');
+    $router->post('auth/validatepasswordresettoken','AuthController@validateResetPasswordToken');
+});
 
 $router->group(['middleware' => 'jwt.auth'], function ($router) {
     $router->get('auth/user', 'AuthController@currentUser');
