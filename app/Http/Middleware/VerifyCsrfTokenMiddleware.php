@@ -43,7 +43,7 @@ class VerifyCsrfTokenMiddleware {
             return $this->addCookieToResponse($request, $next($request));
         }
 
-        throw new TokenMismatchException;
+        throw new TokenMismatchException('CSRF Token is invalid');
     }
 
     /**

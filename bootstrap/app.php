@@ -76,7 +76,7 @@ $app->routeMiddleware([
 $app->middleware([
     App\Http\Middleware\CorsMiddleware::class,
     Illuminate\Session\Middleware\StartSession::class,
-//    App\Http\Middleware\VerifyCsrfTokenMiddleware::class,
+    App\Http\Middleware\VerifyCsrfTokenMiddleware::class,
 ]);
 
 // $app->middleware([

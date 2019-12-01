@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use App\Helpers\APIResponse;
 use Exception;
+use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -67,6 +68,9 @@ class Handler extends ExceptionHandler
         } elseif ($exception instanceof \Dotenv\Exception\ValidationException && $exception->getResponse()) {
             $status = Response::HTTP_BAD_REQUEST;
             $exception = new \Dotenv\Exception\ValidationException('HTTP_BAD_REQUEST', $status, $exception);
+        } elseif ($exception instanceof TokenMismatchException) {
+            $status = Response::HTTP_FORBIDDEN;
+            $exception = new AuthorizationException($exception->getMessage(), $status);
         } elseif ($exception) {
             $exception = new HttpException($status, 'HTTP_INTERNAL_SERVER_ERROR');
         }
