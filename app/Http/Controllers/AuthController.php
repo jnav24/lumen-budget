@@ -31,6 +31,18 @@ class AuthController extends Controller
     }
 
     /**
+     * Get the CSRF Token
+     *
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
+    public function csrf()
+    {
+        return $this->respondWithOK([
+            'csrf' => $this->request->session()->get('_token'),
+        ]);
+    }
+
+    /**
      * Authenticate a user and return the token if the provided credentials are correct.
      *
      * @return mixed

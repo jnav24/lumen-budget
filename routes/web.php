@@ -8,6 +8,7 @@ $router->get('/', function () use ($router) {
  * User Auth
  */
 $router->post('auth/login', 'AuthController@authenticate');
+$router->get('auth/csrf', 'AuthController@csrf');
 $router->post('register', 'AuthController@register');
 $router->post('auth/forgetpassword','AuthController@forgetPassword');
 $router->post('auth/resetpassword','AuthController@resetPassword');
