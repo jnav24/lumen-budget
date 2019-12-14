@@ -14,6 +14,7 @@ use App\Models\Miscellaneous;
 use App\Models\Utilities;
 use App\Models\Vehicles;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class BudgetController extends Controller
@@ -100,6 +101,7 @@ class BudgetController extends Controller
                 $expenses['jobs'] = $this->generatePaidExpenses($expenses['jobs']);
             }
 
+            DB::beginTransaction();
             $budget->user_id = $this->request->auth->id;
             $budget->name = $this->request->input('name');
             $budget->budget_cycle = $this->request->input('cycle');
@@ -117,6 +119,7 @@ class BudgetController extends Controller
             }
 
             $this->setupAndSaveAggregation($budget->id, $expenses);
+            DB::commit();
 
             return $this->respondWithOK([
                 'budget' => [
@@ -130,6 +133,7 @@ class BudgetController extends Controller
         } catch (ValidationException $e) {
             return $this->respondWithBadRequest($e->getMessage(), 'Errors validating request.');
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->respondWithBadRequest([], 'Unable to save budget at this time.');
         }
     }

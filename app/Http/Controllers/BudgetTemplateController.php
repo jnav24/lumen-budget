@@ -234,6 +234,9 @@ class BudgetTemplateController extends Controller
     private function banks_templates($expenses, $id)
     {
         $attributes = $this->getBanksAttributes();
+        if (($key = array_search('bank_template_id', $attributes)) !== false) {
+            unset($attributes[$key]);
+        }
         return $this->insertOrUpdate($attributes, $expenses, $id, 'bank_templates');
     }
 
