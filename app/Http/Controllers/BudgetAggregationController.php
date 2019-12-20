@@ -19,23 +19,30 @@ class BudgetAggregationController extends Controller
                 ->orderBy('budget_cycle', 'desc')
                 ->get()
                 ->toArray();
-            $returned = [];
-            $years = [];
+            $aggregateData = [];
 
             if (!empty($data)) {
                 foreach ($data as $item) {
                     $year = Carbon::createFromTimeString($item['budget_cycle'])->format('Y');
 
-                    if (!in_array($year, $years)) {
-                        $years[] = $year;
-                        $returned[$year] = $this->sortAggregateData($data);
-                    } else {
-                        // @todo remove unneeded data from copy of the $data??
+                    if (empty($aggregateData[$year])) {
+                        $aggregateData[$year] = [
+                            'earned' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
+                            'saved' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
+                            'spent' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
+                        ];
+                    }
+
+                    $cycleMonth = (int)Carbon::createFromTimeString($item['budget_cycle'])->format('n');
+                    foreach ($item['aggregations'] as $aggregate) {
+                        $aggregateData[$year][$aggregate['type']][$cycleMonth-1] = $aggregate['value'];
                     }
                 }
             }
 
-            return $this->respondWithOK(['aggregations' => $returned]);
+            return $this->respondWithOK([
+                'aggregations' => $aggregateData,
+            ]);
         } catch (\Exception $e) {
             return $this->respondWithBadRequest([], 'Unable to retrieve aggregation at this time');
         }
@@ -118,30 +125,5 @@ class BudgetAggregationController extends Controller
         } catch (\Exception $e) {
             return $this->respondWithBadRequest([], 'Unable to retrieve count of unpaid bills at this time.');
         }
-    }
-
-    /**
-     * Sorts data from the budgets table joined with budget aggregation table
-     *
-     * @param $data
-     * @return array
-     */
-    private function sortAggregateData($data)
-    {
-        $returned = [
-            'earned' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
-            'saved' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
-            'spent' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
-        ];
-
-        foreach ($data as $item) {
-            $cycleMonth = (int)Carbon::createFromTimeString($item['budget_cycle'])->format('n');
-
-            foreach ($item['aggregations'] as $aggregate) {
-                $returned[$aggregate['type']][$cycleMonth-1] = $aggregate['value'];
-            }
-        }
-
-        return $returned;
     }
 }
