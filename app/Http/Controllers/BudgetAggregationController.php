@@ -8,6 +8,7 @@ use App\Models\Medical;
 use App\Models\Miscellaneous;
 use App\Models\Utilities;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class BudgetAggregationController extends Controller
 {
@@ -22,28 +23,14 @@ class BudgetAggregationController extends Controller
             $aggregateData = [];
 
             if (!empty($data)) {
-                foreach ($data as $item) {
-                    $year = Carbon::createFromTimeString($item['budget_cycle'])->format('Y');
-
-                    if (empty($aggregateData[$year])) {
-                        $aggregateData[$year] = [
-                            'earned' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
-                            'saved' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
-                            'spent' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
-                        ];
-                    }
-
-                    $cycleMonth = (int)Carbon::createFromTimeString($item['budget_cycle'])->format('n');
-                    foreach ($item['aggregations'] as $aggregate) {
-                        $aggregateData[$year][$aggregate['type']][$cycleMonth-1] = $aggregate['value'];
-                    }
-                }
+                $aggregateData = $this->sortAggregateData($data);
             }
 
             return $this->respondWithOK([
                 'aggregations' => $aggregateData,
             ]);
         } catch (\Exception $e) {
+            Log::error('BudgetAggregationController::getYearlyAggregation - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Unable to retrieve aggregation at this time');
         }
     }
@@ -51,7 +38,7 @@ class BudgetAggregationController extends Controller
     public function getSingleYearAggregation($year)
     {
         try {
-            $returned = [];
+            $aggregateData = [];
             $data = Budgets::where('user_id', $this->request->auth->id)
                 ->where('budget_cycle', 'like', $year . '-%')
                 ->with('aggregations')
@@ -60,11 +47,12 @@ class BudgetAggregationController extends Controller
                 ->toArray();
 
             if (!empty($data)) {
-                $returned[$year] = $this->sortAggregateData($data);
+                $aggregateData = $this->sortAggregateData($data);
             }
 
-            return $this->respondWithOK(['aggregate' => $returned]);
+            return $this->respondWithOK(['aggregate' => $aggregateData]);
         } catch (\Exception $e) {
+            Log::error('BudgetAggregationController::getSingleYearAggregation - ' . $e->getMessage());
             return $this->respondWithBadRequest([], $e->getMessage() . ': Unable to retrieve aggregation at this time');
         }
     }
@@ -125,5 +113,35 @@ class BudgetAggregationController extends Controller
         } catch (\Exception $e) {
             return $this->respondWithBadRequest([], 'Unable to retrieve count of unpaid bills at this time.');
         }
+    }
+
+    /**
+     * Sorts data from the budgets table joined with budget aggregation table
+     *
+     * @param $data
+     * @return array
+     */
+    private function sortAggregateData($data)
+    {
+        $aggregateData = [];
+
+        foreach ($data as $item) {
+            $year = Carbon::createFromTimeString($item['budget_cycle'])->format('Y');
+            $cycleMonth = (int)Carbon::createFromTimeString($item['budget_cycle'])->format('n');
+
+            if (empty($aggregateData[$year])) {
+                $aggregateData[$year] = [
+                    'earned' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
+                    'saved' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
+                    'spent' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
+                ];
+            }
+
+            foreach ($item['aggregations'] as $aggregate) {
+                $aggregateData[$year][$aggregate['type']][$cycleMonth-1] = $aggregate['value'];
+            }
+        }
+
+        return $aggregateData;
     }
 }

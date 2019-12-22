@@ -15,6 +15,7 @@ use App\Models\Utilities;
 use App\Models\Vehicles;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class BudgetController extends Controller
@@ -31,6 +32,7 @@ class BudgetController extends Controller
                 'templates' => $data,
             ]);
         } catch (\Exception $e) {
+            Log::error('BudgetController::getAllBudgets - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Unable to retrieve budgets at this time');
         }
     }
@@ -68,6 +70,7 @@ class BudgetController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
+            Log::error('BudgetController::getSingleBudgetExpenses - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Unable to retrieve budgets at this time');
         }
     }
@@ -134,6 +137,7 @@ class BudgetController extends Controller
             return $this->respondWithBadRequest($e->getMessage(), 'Errors validating request.');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('BudgetController::saveBudget - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Unable to save budget at this time.');
         }
     }
@@ -151,6 +155,7 @@ class BudgetController extends Controller
             Budgets::find($id)->delete();
             return $this->respondWithOK([]);
         } catch (\Exception $e) {
+            Log::error('BudgetController::deleteBudget - ' . $e->getMessage());
             return $this->respondWithBadRequest([], $e->getMessage() . ': Unable to delete budget at this time');
         }
     }
