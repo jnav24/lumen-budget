@@ -8,6 +8,7 @@ use App\Models\Medical;
 use App\Models\Miscellaneous;
 use App\Models\Utilities;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class BudgetAggregationController extends Controller
 {
@@ -29,6 +30,7 @@ class BudgetAggregationController extends Controller
                 'aggregations' => $aggregateData,
             ]);
         } catch (\Exception $e) {
+            Log::error('BudgetAggregationController::getYearlyAggregation - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Unable to retrieve aggregation at this time');
         }
     }
@@ -50,6 +52,7 @@ class BudgetAggregationController extends Controller
 
             return $this->respondWithOK(['aggregate' => $aggregateData]);
         } catch (\Exception $e) {
+            Log::error('BudgetAggregationController::getSingleYearAggregation - ' . $e->getMessage());
             return $this->respondWithBadRequest([], $e->getMessage() . ': Unable to retrieve aggregation at this time');
         }
     }
