@@ -37,7 +37,7 @@ class UserController extends Controller
                 'vehicles' => $vehicles,
             ]);
         } catch(ValidationException $e) {
-            return $this->respondWithBadRequest($e->getMessage(), 'Error validating request');
+            return $this->respondWithBadRequest($e->errors(), 'Error validating request');
         } catch(\Exception $e) {
             return $this->respondWithBadRequest([], 'Unable to save user profile');
         }
