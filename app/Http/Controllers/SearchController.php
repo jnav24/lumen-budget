@@ -29,7 +29,9 @@ class SearchController extends Controller
 
             $data = Budgets::where('user_id', $this->request->auth->id)
                 ->where('budget_cycle', 'LIKE', $this->request->input('year') . '%')
-                ->with($this->request->input('type'))
+                ->with([$this->request->input('type') => function($q) {
+
+                }])
                 ->get();
 
             return $this->respondWithOK([
