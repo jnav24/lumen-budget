@@ -16,6 +16,10 @@ class AddVehicleBalanceColumn extends Migration
         Schema::table('vehicles', function (Blueprint $table) {
             $table->string('balance')->default('0');
         });
+
+        Schema::table('vehicle_templates', function (Blueprint $table) {
+            $table->string('balance')->default('0');
+        });
     }
 
     /**
@@ -26,6 +30,10 @@ class AddVehicleBalanceColumn extends Migration
     public function down()
     {
         Schema::table('vehicles', function (Blueprint $table) {
+            $table->dropColumn('balance');
+        });
+
+        Schema::table('vehicle_templates', function (Blueprint $table) {
             $table->dropColumn('balance');
         });
     }
