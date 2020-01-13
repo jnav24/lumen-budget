@@ -12,8 +12,8 @@ class SearchController extends Controller
     public function runSearch()
     {
         try {
-            $this->validate($this->request, [
-                'type' => [
+            $validated = $this->validate($this->request, [
+                'billType' => [
                     'required',
                     'min:3',
                     Rule::in($this->types),
@@ -25,12 +25,21 @@ class SearchController extends Controller
                     'min:2019',
                     'max:' . (date('Y')+1)
                 ],
+                'type' => [],
+                'name' => [
+                    'min:3',
+                ],
+                'notes' => [],
             ]);
 
-            $data = Budgets::where('user_id', $this->request->auth->id)
-                ->where('budget_cycle', 'LIKE', $this->request->input('year') . '%')
-                ->with([$this->request->input('type') => function($q) {
+            Log::debug($validated);
 
+            $data = Budgets::where('user_id', $this->request->auth->id)
+                ->where('budget_cycle', 'LIKE', $validated['year'] . '%')
+                ->with([$validated['billType'] => function($q) use ($validated) {
+                    $q->when(!empty($validated['name']), function($query) use ($validated) {
+                        return $query->where('name', 'LIKE', '%' . $validated['name'] . '%');
+                    });
                 }])
                 ->get();
 
