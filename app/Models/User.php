@@ -55,4 +55,14 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         return $this->hasOne(UserProfile::class, 'user_id', 'id');
     }
+
+    /**
+     * Get User Vehicles
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function vehicles()
+    {
+        return $this->hasMany(UserVehicles::class, 'user_id', 'id');
+    }
 }

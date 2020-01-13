@@ -30,9 +30,13 @@ class SearchController extends Controller
                     'min:3',
                 ],
                 'notes' => [],
+                'vehicle' => [],
             ]);
 
             Log::debug($validated);
+
+            // @TODO type, note, vehicle are relationships to the model being brought in dynamically
+            // find a way to get the data based on those relationships
 
             $data = Budgets::where('user_id', $this->request->auth->id)
                 ->where('budget_cycle', 'LIKE', $validated['year'] . '%')
