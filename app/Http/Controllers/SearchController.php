@@ -37,8 +37,6 @@ class SearchController extends Controller
             Log::debug($validated);
 
             // @todo add date range to this query
-            // @TODO type, note, vehicle are relationships to the model being brought in dynamically
-            // find a way to get the data based on those relationships
 
             DB::enableQueryLog();
             $data = Budgets::where('user_id', $this->request->auth->id)
@@ -53,6 +51,21 @@ class SearchController extends Controller
                             $q->where('slug', $validated['type']);
                         });
                     });
+
+                    // @todo uncomment when vehicles table gets a notes column
+//                    $relation->when(
+//                        !empty($validated['notes']) && $validated['billType'] === 'vehicles',
+//                        function($query) use ($validated) {
+//                            return $query->where('notes', $validated['notes']);
+//                        });
+
+                    $relation->when(
+                        !empty($validated['vehicle']) && $validated['billType'] === 'vehicles',
+                        function($query) use ($validated) {
+                            return $query->whereHas('vehicle', function($q) use ($validated) {
+                                $q->where('id', $validated['vehicle']);
+                            });
+                        });
                 }]);
 
 
