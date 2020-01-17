@@ -47,12 +47,9 @@ class SearchController extends Controller
                 'vehicle' => [],
             ]);
 
-            Log::debug($validated);
-
             $from = Carbon::create($validated['year'], $validated['startMonth'], 01, 0, 0, 0)->toDateTimeString();
             $to = Carbon::create($validated['year'], $validated['endMonth'], 01, 0, 0, 0)->toDateTimeString();
 
-            DB::enableQueryLog();
             $data = Budgets::where('user_id', $this->request->auth->id)
                 ->whereBetween('budget_cycle', [$from, $to])
                 ->with([$validated['billType'] => function($relation) use ($validated) {
@@ -84,17 +81,13 @@ class SearchController extends Controller
                                 $q->where('id', $validated['vehicle']);
                             });
                         });
-                }]);
-
-
-            $result = $data->get();
-            Log::debug(DB::getQueryLog());
-//            Log::debug(json_encode($result));
+                }])->get();
 
             return $this->respondWithOK([
-                'data' => $result,
+                'data' => $data,
             ]);
         } catch (ValidationException $e) {
+            Log::error('SearchController::runSearch - ' . implode(', ', $e->errors()));
             return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
         } catch (\Exception $e) {
             Log::error('SearchController::runSearch - ' . $e->getMessage());
