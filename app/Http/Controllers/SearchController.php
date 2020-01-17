@@ -32,14 +32,23 @@ class SearchController extends Controller
                     'min:3',
                 ],
                 'notes' => [],
-                'startMonth' => [],
-                'endMonth' => [],
+                'startMonth' => [
+                    'required',
+                    'min:1',
+                    'max:12',
+                    'numeric',
+                ],
+                'endMonth' => [
+                    'required',
+                    'min:1',
+                    'max:12',
+                    'numeric',
+                ],
                 'vehicle' => [],
             ]);
 
             Log::debug($validated);
 
-            // @todo add date range to this query
             $from = Carbon::create($validated['year'], $validated['startMonth'], 01, 0, 0, 0)->toDateTimeString();
             $to = Carbon::create($validated['year'], $validated['endMonth'], 01, 0, 0, 0)->toDateTimeString();
 
