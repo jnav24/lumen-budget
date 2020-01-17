@@ -32,4 +32,12 @@ class Vehicles extends Model
     {
         return $this->hasOne(VehicleTypes::class, 'id', 'vehicle_type_id');
     }
+
+    /**
+     * @return HasOne
+     */
+    public function userVehicle()
+    {
+        return $this->hasOne(UserVehicles::class, 'id', 'user_vehicle_id');
+    }
 }

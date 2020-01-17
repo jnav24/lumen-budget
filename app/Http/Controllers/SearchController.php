@@ -66,7 +66,7 @@ class SearchController extends Controller
                     $relation->when(
                         !empty($validated['vehicle']) && $validated['billType'] === 'vehicles',
                         function($query) use ($validated) {
-                            return $query->whereHas('vehicle', function($q) use ($validated) {
+                            return $query->whereHas('userVehicle', function($q) use ($validated) {
                                 $q->where('id', $validated['vehicle']);
                             });
                         });
@@ -75,7 +75,7 @@ class SearchController extends Controller
 
             $result = $data->get();
             Log::debug(DB::getQueryLog());
-            Log::debug(json_encode($result));
+//            Log::debug(json_encode($result));
 
             return $this->respondWithOK([
                 'data' => $result,
