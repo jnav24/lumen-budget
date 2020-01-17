@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Medical extends Model
 {
@@ -23,4 +24,12 @@ class Medical extends Model
      * @var string
      */
     protected $table = 'medical';
+
+    /**
+     * @return HasOne
+     */
+    public function type()
+    {
+        return $this->hasOne(MedicalTypes::class, 'id', 'medical_type_id');
+    }
 }

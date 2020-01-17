@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Banks extends Model
 {
@@ -23,4 +24,12 @@ class Banks extends Model
      * @var string
      */
     protected $table = 'banks';
+
+    /**
+     * @return HasOne
+     */
+    public function type()
+    {
+        return $this->hasOne(BankTypes::class, 'id', 'bank_type_id');
+    }
 }
