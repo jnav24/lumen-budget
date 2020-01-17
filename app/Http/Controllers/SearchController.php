@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Budgets;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -35,20 +36,32 @@ class SearchController extends Controller
 
             Log::debug($validated);
 
+            // @todo add date range to this query
             // @TODO type, note, vehicle are relationships to the model being brought in dynamically
             // find a way to get the data based on those relationships
 
+            DB::enableQueryLog();
             $data = Budgets::where('user_id', $this->request->auth->id)
                 ->where('budget_cycle', 'LIKE', $validated['year'] . '%')
-                ->with([$validated['billType'] => function($q) use ($validated) {
-                    $q->when(!empty($validated['name']), function($query) use ($validated) {
+                ->with([$validated['billType'] => function($relation) use ($validated) {
+                    $relation->when(!empty($validated['name']), function($query) use ($validated) {
                         return $query->where('name', 'LIKE', '%' . $validated['name'] . '%');
                     });
-                }])
-                ->get();
+
+                    $relation->when(!empty($validated['type']), function($query) use ($validated) {
+                        return $query->whereHas('type', function($q) use ($validated) {
+                            $q->where('slug', $validated['type']);
+                        });
+                    });
+                }]);
+
+
+            $result = $data->get();
+            Log::debug(DB::getQueryLog());
+            Log::debug(json_encode($result));
 
             return $this->respondWithOK([
-                'data' => $data,
+                'data' => $result,
             ]);
         } catch (ValidationException $e) {
             return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
