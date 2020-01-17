@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Budgets;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -31,16 +32,20 @@ class SearchController extends Controller
                     'min:3',
                 ],
                 'notes' => [],
+                'startMonth' => [],
+                'endMonth' => [],
                 'vehicle' => [],
             ]);
 
             Log::debug($validated);
 
             // @todo add date range to this query
+            $from = Carbon::create($validated['year'], $validated['startMonth'], 01, 0, 0, 0)->toDateTimeString();
+            $to = Carbon::create($validated['year'], $validated['endMonth'], 01, 0, 0, 0)->toDateTimeString();
 
             DB::enableQueryLog();
             $data = Budgets::where('user_id', $this->request->auth->id)
-                ->where('budget_cycle', 'LIKE', $validated['year'] . '%')
+                ->whereBetween('budget_cycle', [$from, $to])
                 ->with([$validated['billType'] => function($relation) use ($validated) {
                     $ignoreTypeList = ['miscellaneous'];
 
