@@ -42,15 +42,19 @@ class SearchController extends Controller
             $data = Budgets::where('user_id', $this->request->auth->id)
                 ->where('budget_cycle', 'LIKE', $validated['year'] . '%')
                 ->with([$validated['billType'] => function($relation) use ($validated) {
+                    $ignoreTypeList = ['miscellaneous'];
+
                     $relation->when(!empty($validated['name']), function($query) use ($validated) {
                         return $query->where('name', 'LIKE', '%' . $validated['name'] . '%');
                     });
 
-                    $relation->when(!empty($validated['type']), function($query) use ($validated) {
-                        return $query->whereHas('type', function($q) use ($validated) {
-                            $q->where('slug', $validated['type']);
+                    $relation->when(
+                        !empty($validated['type']) && array_search($validated['billType'], $ignoreTypeList) === false,
+                        function($query) use ($validated) {
+                            return $query->whereHas('type', function($q) use ($validated) {
+                                $q->where('slug', $validated['type']);
+                            });
                         });
-                    });
 
                     // @todo uncomment when vehicles table gets a notes column
 //                    $relation->when(
