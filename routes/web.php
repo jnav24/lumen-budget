@@ -66,3 +66,10 @@ $router->group(['middleware' => 'jwt.auth'], function ($router) {
 $router->group(['middleware' => 'jwt.auth'], function ($router) {
    $router->post('user-profile', 'UserController@updateUserProfile');
 });
+
+/**
+ * Search
+ */
+$router->group(['middleware' => 'jwt.auth'], function ($router) {
+    $router->get('search', 'SearchController@runSearch');
+});

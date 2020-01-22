@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserProfile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
@@ -37,8 +38,9 @@ class UserController extends Controller
                 'vehicles' => $vehicles,
             ]);
         } catch(ValidationException $e) {
-            return $this->respondWithBadRequest($e->getMessage(), 'Error validating request');
+            return $this->respondWithBadRequest($e->errors(), 'Error validating request');
         } catch(\Exception $e) {
+            Log::error('UserController::updateUserProfile - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Unable to save user profile');
         }
     }

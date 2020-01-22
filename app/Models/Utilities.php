@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Utilities extends Model
 {
@@ -23,4 +24,12 @@ class Utilities extends Model
      * @var string
      */
     protected $table = 'utilities';
+
+    /**
+     * @return HasOne
+     */
+    public function type()
+    {
+        return $this->hasOne(UtilityTypes::class, 'id', 'utility_type_id');
+    }
 }

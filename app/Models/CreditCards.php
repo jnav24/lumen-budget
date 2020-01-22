@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class CreditCards extends Model
 {
@@ -23,4 +24,12 @@ class CreditCards extends Model
      * @var string
      */
     protected $table = 'credit_cards';
+
+    /**
+     * @return HasOne
+     */
+    public function type()
+    {
+        return $this->hasOne(CreditCardTypes::class, 'id', 'credit_card_type_id');
+    }
 }

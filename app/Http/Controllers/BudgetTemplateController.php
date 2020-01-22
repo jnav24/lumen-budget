@@ -116,7 +116,8 @@ class BudgetTemplateController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            return $this->respondWithBadRequest([], $e->getMessage() . ' ' . 'Unable to save budget template at this time.');
+            Log::error('BudgetTemplateController::saveBudgetTemplates - ' . $e->getMessage());
+            return $this->respondWithBadRequest([], 'Unable to save budget template at this time.');
         }
     }
 

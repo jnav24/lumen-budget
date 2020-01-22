@@ -27,6 +27,22 @@ class Controller extends BaseController
     protected $tableId;
 
     /**
+     * Expenses types
+     *
+     * @var array
+     */
+    protected $types = [
+        'banks',
+        'credit_cards',
+        'investments',
+        'jobs',
+        'medical',
+        'miscellaneous',
+        'utilities',
+        'vehicles',
+    ];
+
+    /**
      * Create a new controller instance.
      *
      * @param Request $request

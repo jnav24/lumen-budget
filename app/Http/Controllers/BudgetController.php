@@ -134,7 +134,7 @@ class BudgetController extends Controller
                 ],
             ]);
         } catch (ValidationException $e) {
-            return $this->respondWithBadRequest($e->getMessage(), 'Errors validating request.');
+            return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('BudgetController::saveBudget - ' . $e->getMessage());
@@ -156,7 +156,7 @@ class BudgetController extends Controller
             return $this->respondWithOK([]);
         } catch (\Exception $e) {
             Log::error('BudgetController::deleteBudget - ' . $e->getMessage());
-            return $this->respondWithBadRequest([], $e->getMessage() . ': Unable to delete budget at this time');
+            return $this->respondWithBadRequest([], 'Unable to delete budget at this time');
         }
     }
 

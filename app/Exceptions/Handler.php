@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use App\Helpers\APIResponse;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -68,6 +69,7 @@ class Handler extends ExceptionHandler
             $status = Response::HTTP_BAD_REQUEST;
             $exception = new \Dotenv\Exception\ValidationException('HTTP_BAD_REQUEST', $status, $exception);
         } elseif ($exception) {
+            Log::error('App\Exceptions\Handler - ' . $exception->getMessage());
             $exception = new HttpException($status, 'HTTP_INTERNAL_SERVER_ERROR');
         }
 
