@@ -71,5 +71,5 @@ $router->group(['middleware' => 'jwt.auth'], function ($router) {
  * Search
  */
 $router->group(['middleware' => 'jwt.auth'], function ($router) {
-    $router->get('search', 'SearchController@runSearch');
+    $router->post('search', 'SearchController@runSearch');
 });
