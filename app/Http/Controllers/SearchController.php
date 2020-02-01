@@ -87,7 +87,7 @@ class SearchController extends Controller
                 'data' => $data,
             ]);
         } catch (ValidationException $e) {
-            Log::error('SearchController::runSearch - ' . implode(', ', $e->errors()));
+            Log::error('SearchController::runSearch - ' . json_encode($e->errors()));
             return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
         } catch (\Exception $e) {
             Log::error('SearchController::runSearch - ' . $e->getMessage());
