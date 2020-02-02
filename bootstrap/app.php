@@ -67,6 +67,7 @@ $app->singleton(
 
 $app->routeMiddleware([
     'jwt.auth' => App\Http\Middleware\JwtMiddleware::class,
+    'user.ip' => App\Http\Middleware\UserIpMiddleware::class,
 ]);
 
 $app->middleware([
