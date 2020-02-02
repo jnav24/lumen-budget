@@ -48,7 +48,11 @@ class JwtMiddleware
             return $this->respondWithBadRequest(['error' => $ex->getMessage()], 'An error occurred while decoding the token');
         }
 
+        // @todo get with user-ips
         $user = User::find($credentials->sub);
+
+        // @todo validate user-ips
+        // @todo if validation fails, send failed response
 
         if(empty($user)) {
             return $this->respondWithBadRequest([], 'An error occurred while retrieving the user');

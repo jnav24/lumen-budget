@@ -43,11 +43,17 @@ class AuthController extends Controller
                 'password' => 'required|min:8|max:24'
             ]);
 
+            // @todo get user-ips
             $user = User::where('username', $this->request->input('username'))->first();
 
             if (!$user) {
                 return $this->respondWithBadRequest([], 'Username does not exist');
             }
+
+            // @todo validate user-ip against $this->request->ip()
+            // @todo if validation fails, send a code to email on file and redirect the front end to page to validate the code
+            // GlobalHelper::sendMailable($user->username, new ForgotPasswordMailable($user)); example of sending an email
+            // @todo also consider setting a value in the user's if there is an invalid ip
 
             if (Hash::check($this->request->input('password'), $user->password)) {
                 $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
