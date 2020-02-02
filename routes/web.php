@@ -7,11 +7,13 @@ $router->get('/', function () use ($router) {
 /**
  * User Auth
  */
-$router->post('auth/login', 'AuthController@authenticate');
-$router->post('register', 'AuthController@register');
-$router->post('auth/forgetpassword','AuthController@forgetPassword');
-$router->post('auth/resetpassword','AuthController@resetPassword');
-$router->post('auth/validatepasswordresettoken','AuthController@validateResetPasswordToken');
+$router->group(['middleware' => 'user.ip'], function ($router) {
+    $router->post('auth/login', 'AuthController@authenticate');
+    $router->post('register', 'AuthController@register');
+    $router->post('auth/forgetpassword','AuthController@forgetPassword');
+    $router->post('auth/resetpassword','AuthController@resetPassword');
+    $router->post('auth/validatepasswordresettoken','AuthController@validateResetPasswordToken');
+});
 
 $router->group(['middleware' => 'jwt.auth'], function ($router) {
     $router->get('auth/user', 'AuthController@currentUser');
