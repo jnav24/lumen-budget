@@ -139,7 +139,7 @@ class AuthController extends Controller
 
         // @todo if validation fails, send a code to email on file and redirect the front end to page to validate the code
         // GlobalHelper::sendMailable($user->username, new ForgotPasswordMailable($user)); example of sending an email
-        $deviceList = $user->ips->toArray();
+        $deviceList = $user->devices->toArray();
         $deviceIndex = array_search($this->request->ip(), array_column($deviceList, 'ip'));
 
         if ($deviceIndex === false || empty($deviceList[$deviceIndex]['verified_at'])) {
@@ -301,6 +301,7 @@ class AuthController extends Controller
 
         $userDevice->user_id = $this->request->auth->id;
         $userDevice->ip = $this->request->ip();
+        $userDevice->agent = $this->request->header('user-agent');
         $userDevice->verify_secret = GlobalHelper::generateSecret();
         $userDevice->verify_token = $token;
         $userDevice->expires_at = Carbon::now()->addMinutes(30);

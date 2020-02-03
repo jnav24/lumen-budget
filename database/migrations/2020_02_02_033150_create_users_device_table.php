@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateUsersIpTable extends Migration
+class CreateUsersDeviceTable extends Migration
 {
     /**
      * Run the migrations.
@@ -18,8 +18,7 @@ class CreateUsersIpTable extends Migration
                 $table->increments('id');
                 $table->integer('user_id', false, true);
                 $table->string('ip');
-                $table->string('browser');
-                $table->string('os');
+                $table->string('agent');
                 $table->string('verify_secret');
                 $table->string('verify_token');
                 $table->timestamp('verified_at')->nullable();
