@@ -29,9 +29,20 @@ class GlobalHelper
      * @param int $length
      * @return string
      */
-    public static function generateToken(int $length = 40)
+    public static function generateToken(int $length = 40): string
     {
         return hash_hmac('sha256', Str::random($length), env('APP_KEY', '$ySt3MOfTh3D0wn!22'));
+    }
+
+    /**
+     * Generate a random non-hash string
+     *
+     * @param int $length
+     * @return string
+     */
+    public static function generateSecret(int $length = 6): string
+    {
+        return strtoupper(Str::random($length));
     }
 
     /**

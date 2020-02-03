@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Helpers\GlobalHelper;
 use App\Models\User;
+use App\Models\UserIp;
 use App\Models\UserProfile;
 use App\Models\UserVehicles;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use App\Mail\ForgotPasswordMailable;
 
@@ -43,17 +45,13 @@ class AuthController extends Controller
                 'password' => 'required|min:8|max:24'
             ]);
 
-            // @todo get user-ips
-            $user = User::where('username', $this->request->input('username'))->first();
+            $user = User::where('username', $this->request->input('username'))
+                ->with('ips')
+                ->first();
 
             if (!$user) {
                 return $this->respondWithBadRequest([], 'Username does not exist');
             }
-
-            // @todo validate user-ip against $this->request->ip()
-            // @todo if validation fails, send a code to email on file and redirect the front end to page to validate the code
-            // GlobalHelper::sendMailable($user->username, new ForgotPasswordMailable($user)); example of sending an email
-            // @todo also consider setting a value in the user's if there is an invalid ip
 
             if (Hash::check($this->request->input('password'), $user->password)) {
                 $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
@@ -61,6 +59,22 @@ class AuthController extends Controller
 
                 if (!$userProfile) {
                     return $this->respondWithBadRequest([], 'There is a problem with your account. Please contact the administrator.');
+                }
+
+                // @todo if validation fails, send a code to email on file and redirect the front end to page to validate the code
+                // GlobalHelper::sendMailable($user->username, new ForgotPasswordMailable($user)); example of sending an email
+                Log::debug('ips: - ' . json_encode($user));
+                $ipList = $user->ips->toArray();
+                $ipIndex = array_search($this->request->ip(), array_column($ipList, 'ip'));
+
+                if ($ipIndex === false || empty($ipList[$ipIndex]['verified_at'])) {
+                    $token = $this->setUserIpRecord($ipList, $ipIndex);
+                    // @todo add mail to the queue
+
+                    return $this->respondWith([
+                        'token' => $this->jwt($user),
+                        'ipToken' => $token,
+                    ], 'verify-sign-in');
                 }
 
                 return $this->respondWithOK([
@@ -264,5 +278,32 @@ class AuthController extends Controller
         } catch (\Exception $ex) {
             return $this->respondWithBadRequest([], 'Unable to validate reset password token at this time.');
         }
+    }
+
+    /**
+     * @param $ipList
+     * @param bool $ipIndex
+     * @return string|null
+     */
+    private function setUserIpRecord($ipList, bool $ipIndex)
+    {
+        $userIp = null;
+        $token = null;
+
+        if (!empty($ipList[$ipIndex]['id'])) {
+            $userIp = UserIp::find($ipList[$ipIndex]['id']);
+            $token = $ipList[$ipIndex]['verify_token'];
+        }
+
+        if (empty($userIp)) {
+            $userIp = new UserIp();
+            $token = GlobalHelper::generateToken(64);
+        }
+
+        $userIp->ip = $this->request->ip();
+        $userIp->verify_secret = GlobalHelper::generateSecret();
+        $userIp->verify_token = $token;
+        $userIp->save();
+        return $token;
     }
 }
