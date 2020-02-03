@@ -18,6 +18,8 @@ class CreateUsersIpTable extends Migration
                 $table->increments('id');
                 $table->integer('user_id', false, true);
                 $table->string('ip');
+                $table->string('browser');
+                $table->string('os');
                 $table->string('verify_secret');
                 $table->string('verify_token');
                 $table->timestamp('verified_at')->nullable();
