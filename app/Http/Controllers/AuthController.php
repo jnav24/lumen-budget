@@ -46,9 +46,7 @@ class AuthController extends Controller
                 'password' => 'required|min:8|max:24'
             ]);
 
-            $user = User::where('username', $this->request->input('username'))
-                ->with('ips')
-                ->first();
+            $user = User::where('username', $this->request->input('username'))->first();
 
             if (!$user) {
                 return $this->respondWithBadRequest([], 'Username does not exist');
@@ -60,22 +58,6 @@ class AuthController extends Controller
 
                 if (!$userProfile) {
                     return $this->respondWithBadRequest([], 'There is a problem with your account. Please contact the administrator.');
-                }
-
-                // @todo if validation fails, send a code to email on file and redirect the front end to page to validate the code
-                // GlobalHelper::sendMailable($user->username, new ForgotPasswordMailable($user)); example of sending an email
-                Log::debug('ips: - ' . json_encode($user));
-                $ipList = $user->ips->toArray();
-                $ipIndex = array_search($this->request->ip(), array_column($ipList, 'ip'));
-
-                if ($ipIndex === false || empty($ipList[$ipIndex]['verified_at'])) {
-                    $token = $this->setUserIpRecord($ipList, $ipIndex);
-                    // @todo add mail to the queue
-
-                    return $this->respondWith([
-                        'token' => $this->jwt($user),
-                        'ipToken' => $token,
-                    ], 'verify-sign-in');
                 }
 
                 return $this->respondWithOK([
@@ -154,6 +136,25 @@ class AuthController extends Controller
     public function currentUser()
     {
         $user = $this->request->auth;
+        Log::debug('currentUser - ' . json_encode($user));
+        Log::debug('currentUser:ips - ' . json_encode($user->ips));
+
+        // @todo if validation fails, send a code to email on file and redirect the front end to page to validate the code
+        // GlobalHelper::sendMailable($user->username, new ForgotPasswordMailable($user)); example of sending an email
+        $ipList = $user->ips->toArray();
+        $ipIndex = array_search($this->request->ip(), array_column($ipList, 'ip'));
+
+        if ($ipIndex === false || empty($ipList[$ipIndex]['verified_at'])) {
+//            $token = $this->setUserIpRecord($ipList, $ipIndex);
+            $token = 'test';
+            // @todo add mail to the queue
+
+            return $this->respondWith([
+                'token' => $token,
+            ], 'verify-sign-in');
+        }
+
+
         $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
         $vehicles = UserVehicles::where('user_id', $user->id)->get()->toArray();
 
