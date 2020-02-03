@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\UserIp;
 use App\Models\UserProfile;
 use App\Models\UserVehicles;
+use Carbon\Carbon;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -303,6 +304,7 @@ class AuthController extends Controller
         $userIp->ip = $this->request->ip();
         $userIp->verify_secret = GlobalHelper::generateSecret();
         $userIp->verify_token = $token;
+        $userIp->expires_at = Carbon::now()->addMinutes(30);
         $userIp->save();
         return $token;
     }

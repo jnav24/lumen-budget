@@ -21,6 +21,7 @@ class CreateUsersIpTable extends Migration
                 $table->string('verify_secret');
                 $table->string('verify_token');
                 $table->timestamp('verified_at')->nullable();
+                $table->timestamp('expires_at')->nullable();
                 $table->timestamps();
 
                 $table->foreign('user_id')
