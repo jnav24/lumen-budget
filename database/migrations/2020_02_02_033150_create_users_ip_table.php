@@ -13,8 +13,8 @@ class CreateUsersIpTable extends Migration
      */
     public function up()
     {
-        if (!Schema::hasTable('user_ips')) {
-            Schema::create('user_ips', function (Blueprint $table) {
+        if (!Schema::hasTable('user_devices')) {
+            Schema::create('user_devices', function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('user_id', false, true);
                 $table->string('ip');
@@ -39,6 +39,6 @@ class CreateUsersIpTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_ips');
+        Schema::dropIfExists('user_devices');
     }
 }

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\GlobalHelper;
 use App\Models\User;
-use App\Models\UserIp;
+use App\Models\UserDevice;
 use App\Models\UserProfile;
 use App\Models\UserVehicles;
 use Carbon\Carbon;
@@ -139,11 +139,11 @@ class AuthController extends Controller
 
         // @todo if validation fails, send a code to email on file and redirect the front end to page to validate the code
         // GlobalHelper::sendMailable($user->username, new ForgotPasswordMailable($user)); example of sending an email
-        $ipList = $user->ips->toArray();
-        $ipIndex = array_search($this->request->ip(), array_column($ipList, 'ip'));
+        $deviceList = $user->ips->toArray();
+        $deviceIndex = array_search($this->request->ip(), array_column($deviceList, 'ip'));
 
-        if ($ipIndex === false || empty($ipList[$ipIndex]['verified_at'])) {
-            $token = $this->setUserIpRecord($ipList, $ipIndex);
+        if ($deviceIndex === false || empty($deviceList[$deviceIndex]['verified_at'])) {
+            $token = $this->setUserDeviceRecord($deviceList, $deviceIndex);
             // @todo add mail to the queue
 
             return $this->respondWith([
@@ -280,31 +280,31 @@ class AuthController extends Controller
     }
 
     /**
-     * @param $ipList
-     * @param bool $ipIndex
+     * @param $deviceList
+     * @param bool $deviceIndex
      * @return string|null
      */
-    private function setUserIpRecord($ipList, bool $ipIndex)
+    private function setUserDeviceRecord($deviceList, bool $deviceIndex)
     {
-        $userIp = null;
+        $userDevice = null;
         $token = null;
 
-        if (!empty($ipList[$ipIndex]['id'])) {
-            $userIp = UserIp::find($ipList[$ipIndex]['id']);
-            $token = $ipList[$ipIndex]['verify_token'];
+        if (!empty($deviceList[$deviceIndex]['id'])) {
+            $userDevice = UserDevice::find($deviceList[$deviceIndex]['id']);
+            $token = $deviceList[$deviceIndex]['verify_token'];
         }
 
-        if (empty($userIp)) {
-            $userIp = new UserIp();
+        if (empty($userDevice)) {
+            $userDevice = new UserDevice();
             $token = GlobalHelper::generateToken(64);
         }
 
-        $userIp->user_id = $this->request->auth->id;
-        $userIp->ip = $this->request->ip();
-        $userIp->verify_secret = GlobalHelper::generateSecret();
-        $userIp->verify_token = $token;
-        $userIp->expires_at = Carbon::now()->addMinutes(30);
-        $userIp->save();
+        $userDevice->user_id = $this->request->auth->id;
+        $userDevice->ip = $this->request->ip();
+        $userDevice->verify_secret = GlobalHelper::generateSecret();
+        $userDevice->verify_token = $token;
+        $userDevice->expires_at = Carbon::now()->addMinutes(30);
+        $userDevice->save();
         return $token;
     }
 }

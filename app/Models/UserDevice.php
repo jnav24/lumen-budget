@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class UserIp extends Model
+class UserDevice extends Model
 {
     /**
      * @var array
@@ -19,5 +19,5 @@ class UserIp extends Model
      *
      * @var string
      */
-    protected $table = 'user_ips';
+    protected $table = 'user_devices';
 }
