@@ -136,8 +136,6 @@ class AuthController extends Controller
     public function currentUser()
     {
         $user = $this->request->auth;
-        Log::debug('currentUser - ' . json_encode($user));
-        Log::debug('currentUser:ips - ' . json_encode($user->ips));
 
         // @todo if validation fails, send a code to email on file and redirect the front end to page to validate the code
         // GlobalHelper::sendMailable($user->username, new ForgotPasswordMailable($user)); example of sending an email
@@ -145,8 +143,7 @@ class AuthController extends Controller
         $ipIndex = array_search($this->request->ip(), array_column($ipList, 'ip'));
 
         if ($ipIndex === false || empty($ipList[$ipIndex]['verified_at'])) {
-//            $token = $this->setUserIpRecord($ipList, $ipIndex);
-            $token = 'test';
+            $token = $this->setUserIpRecord($ipList, $ipIndex);
             // @todo add mail to the queue
 
             return $this->respondWith([
@@ -302,6 +299,7 @@ class AuthController extends Controller
             $token = GlobalHelper::generateToken(64);
         }
 
+        $userIp->user_id = $this->request->auth->id;
         $userIp->ip = $this->request->ip();
         $userIp->verify_secret = GlobalHelper::generateSecret();
         $userIp->verify_token = $token;
