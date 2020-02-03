@@ -18,6 +18,9 @@ class CreateUsersIpTable extends Migration
                 $table->increments('id');
                 $table->integer('user_id', false, true);
                 $table->string('ip');
+                $table->string('verify_secret');
+                $table->string('verify_token');
+                $table->timestamp('verified_at')->nullable();
                 $table->timestamps();
 
                 $table->foreign('user_id')
@@ -35,6 +38,6 @@ class CreateUsersIpTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users_ip');
+        Schema::dropIfExists('user_ips');
     }
 }
