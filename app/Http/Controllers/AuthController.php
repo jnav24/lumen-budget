@@ -53,6 +53,7 @@ class AuthController extends Controller
             }
 
             if (Hash::check($this->request->input('password'), $user->password)) {
+                // @todo remove calls to user profile and vehicle
                 $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
                 $vehicles = UserVehicles::where('user_id', $user->id)->get()->toArray();
 
@@ -60,6 +61,7 @@ class AuthController extends Controller
                     return $this->respondWithBadRequest([], 'There is a problem with your account. Please contact the administrator.');
                 }
 
+                // @todo only return token because current user returns that info
                 return $this->respondWithOK([
                     'token' => $this->jwt($user),
                     'user' => [
