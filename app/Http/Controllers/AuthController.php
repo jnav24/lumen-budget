@@ -145,6 +145,10 @@ class AuthController extends Controller
         $deviceList = $user->devices->toArray();
         $deviceIndex = array_search($this->request->ip(), array_column($deviceList, 'ip'));
 
+        // @todo check db where ip user_id and device matches, if it exists, return that
+        // otherwise create a new record
+        // the problem is that when a user signs in, it updates the current user_device record
+
         if ($deviceIndex === false || empty($deviceList[$deviceIndex]['verified_at'])) {
             $token = $this->setUserDeviceRecord($deviceList, $deviceIndex);
             // @todo add mail to the queue
@@ -331,12 +335,13 @@ class AuthController extends Controller
 
         if (!empty($deviceList[$deviceIndex]['id'])) {
             $userDevice = UserDevice::find($deviceList[$deviceIndex]['id']);
-            $token = $deviceList[$deviceIndex]['verify_token'];
         }
 
         if (empty($userDevice)) {
             $userDevice = new UserDevice();
             $token = GlobalHelper::generateToken(64);
+        } else {
+            return $userDevice->verify_token;
         }
 
         $userDevice->user_id = $this->request->auth->id;
