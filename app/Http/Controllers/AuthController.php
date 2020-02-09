@@ -281,6 +281,38 @@ class AuthController extends Controller
         }
     }
 
+    public function verifyToken($id, $token)
+    {
+        try {
+            $user = User::with('devices')->find($id);
+
+            if (empty($user)) {
+                return $this->respondWithBadRequest([], 'Token or user does not exist');
+            }
+
+            $devices = $user->devices;
+            $index = $devices
+                ->pluck('verify_token')
+                ->search($token);
+
+            if ($index === false) {
+                return $this->respondWithBadRequest([], 'Token or user does not exist');
+            }
+
+            $device = $devices->splice($index, 1)->shift();
+
+            if (!empty($device->verified_at)) {
+                return $this->respondWithBadRequest([], 'Token is no longer valid');
+            }
+
+            return $this->respondWithOK([
+                'expires_at' => $device->expires_at,
+            ]);
+        } catch (ValidationException $e) {
+            return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
+        }
+    }
+
     /**
      * @param $deviceList
      * @param bool $deviceIndex
