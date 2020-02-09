@@ -53,7 +53,7 @@ class AuthController extends Controller
             }
 
             if (Hash::check($this->request->input('password'), $user->password)) {
-                // @todo remove calls to user profile and vehicle
+                // @todo remove calls to user profile and vehicle because its not necessary since user data is provided in another method
                 $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
                 $vehicles = UserVehicles::where('user_id', $user->id)->get()->toArray();
 
@@ -138,6 +138,7 @@ class AuthController extends Controller
     public function currentUser()
     {
         $user = $this->request->auth;
+        $verifyList = [];
 
         // @todo if validation fails, send a code to email on file and redirect the front end to page to validate the code
         // GlobalHelper::sendMailable($user->username, new ForgotPasswordMailable($user)); example of sending an email
@@ -148,9 +149,9 @@ class AuthController extends Controller
             $token = $this->setUserDeviceRecord($deviceList, $deviceIndex);
             // @todo add mail to the queue
 
-            return $this->respondWith([
+            $verifyList = [
                 'token' => $token,
-            ], 'verify-sign-in');
+            ];
         }
 
 
@@ -162,6 +163,7 @@ class AuthController extends Controller
                 'email' => $user->username,
             ] + $userProfile,
             'vehicles' => $vehicles,
+            'verify' => $verifyList,
         ]);
     }
 
