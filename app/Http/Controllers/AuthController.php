@@ -323,6 +323,36 @@ class AuthController extends Controller
         }
     }
 
+    public function submitVerifyToken()
+    {
+        try {
+            $valid = $this->validate($this->request, [
+                'id' => 'required|numeric',
+                'token' => 'required|alpha_num',
+                'verify' => 'required|alpha_num',
+            ]);
+
+            $device = UserDevice::where('user_id', $valid['id'])
+                ->where('verify_token', $valid['token'])
+                ->where('verify_secret', $valid['verify'])
+                ->whereNull('verified_at')
+                ->first();
+
+            if (!empty($device)) {
+                $device->verified_at = Carbon::now();
+                $device->save();
+                return $this->respondWithOK([], 'Verification completed successfully!');
+            }
+
+            return $this->respondWithBadRequest([], '');
+        } catch (ValidationException $e) {
+            return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
+        } catch (\Exception $e) {
+            Log::error('AuthController::submitVerifyToken - ' . $e->getMessage());
+            return $this->respondWithBadRequest([], 'Something unexpected has occurred');
+        }
+    }
+
     /**
      * @param $deviceList
      * @param bool $deviceIndex

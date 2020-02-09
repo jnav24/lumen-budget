@@ -14,6 +14,7 @@ $router->group(['middleware' => 'user.ip'], function ($router) {
     $router->post('auth/resetpassword','AuthController@resetPassword');
     $router->post('auth/validatepasswordresettoken','AuthController@validateResetPasswordToken');
     $router->get('auth/verify/{id}/{token}', 'AuthController@verifyToken');
+    $router->post('auth/submit-verify', 'AuthController@submitVerifyToken');
 });
 
 $router->group(['middleware' => 'jwt.auth'], function ($router) {
