@@ -284,6 +284,10 @@ class AuthController extends Controller
     public function verifyToken($id, $token)
     {
         try {
+            if (!is_numeric($id)) {
+                return $this->respondWithBadRequest([], 'Token or user does not exist');
+            }
+
             $user = User::with('devices')->find($id);
 
             if (empty($user)) {
