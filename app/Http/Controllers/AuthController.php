@@ -343,7 +343,7 @@ class AuthController extends Controller
                 return $this->respondWithOK([], 'Verification completed successfully!');
             }
 
-            return $this->respondWithBadRequest([], '');
+            return $this->respondWithBadRequest();
         } catch (ValidationException $e) {
             return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
         } catch (\Exception $e) {
@@ -360,26 +360,23 @@ class AuthController extends Controller
                 'token' => 'required|alpha_num',
             ]);
 
-            // @todo get user email
-            $device = UserDevice::where('user_id', $valid['id'])
-                ->where('verify_token', $valid['token'])
-                ->where('verify_secret', $valid['verify'])
-                ->whereNull('verified_at')
-                ->first();
+            $user = User::find($valid['id']);
+            $device = $user->devices->where('verify_token', $valid['token'])->first();
 
             if (!empty($device)) {
                 $device->verify_secret = GlobalHelper::generateSecret();
                 $device->verify_token = GlobalHelper::generateSecret(64);
                 $device->expires_at = Carbon::now()->addMinutes(30);
                 $device->save();
-                // @todo send email
+                // @todo send email; add to queue
+                return $this->respondWithOK();
             }
 
-            return $this->respondWithBadRequest([], '');
+            return $this->respondWithBadRequest();
         } catch (ValidationException $e) {
             return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
         } catch (\Exception $e) {
-            Log::error('AuthController::submitVerifyToken - ' . $e->getMessage());
+            Log::error('AuthController::resendVerifyToken - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Something unexpected has occurred');
         }
     }
