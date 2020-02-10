@@ -140,8 +140,6 @@ class AuthController extends Controller
         $user = $this->request->auth;
         $verifyList = [];
 
-        // @todo if validation fails, send a code to email on file and redirect the front end to page to validate the code
-        // GlobalHelper::sendMailable($user->username, new ForgotPasswordMailable($user)); example of sending an email
         $deviceList = $user->devices->toArray();
         $deviceIndex = array_search($this->request->ip(), array_column($deviceList, 'ip'));
 
@@ -152,6 +150,7 @@ class AuthController extends Controller
         if ($deviceIndex === false || empty($deviceList[$deviceIndex]['verified_at'])) {
             $token = $this->setUserDeviceRecord($deviceList, $deviceIndex);
             // @todo add mail to the queue
+            // GlobalHelper::sendMailable($user->username, new ForgotPasswordMailable($user)); example of sending an email
 
             $verifyList = [
                 'token' => $token,
@@ -353,12 +352,46 @@ class AuthController extends Controller
         }
     }
 
+    public function resendVerifyToken()
+    {
+        try {
+            $valid = $this->validate($this->request, [
+                'id' => 'required|numeric',
+                'token' => 'required|alpha_num',
+            ]);
+
+            // @todo get user email
+            $device = UserDevice::where('user_id', $valid['id'])
+                ->where('verify_token', $valid['token'])
+                ->where('verify_secret', $valid['verify'])
+                ->whereNull('verified_at')
+                ->first();
+
+            if (!empty($device)) {
+                $device->verify_secret = GlobalHelper::generateSecret();
+                $device->verify_token = GlobalHelper::generateSecret(64);
+                $device->expires_at = Carbon::now()->addMinutes(30);
+                $device->save();
+                // @todo send email
+            }
+
+            return $this->respondWithBadRequest([], '');
+        } catch (ValidationException $e) {
+            return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
+        } catch (\Exception $e) {
+            Log::error('AuthController::submitVerifyToken - ' . $e->getMessage());
+            return $this->respondWithBadRequest([], 'Something unexpected has occurred');
+        }
+    }
+
     /**
+     * Create device record and returns token
+     *
      * @param $deviceList
      * @param bool $deviceIndex
-     * @return string|null
+     * @return string
      */
-    private function setUserDeviceRecord($deviceList, bool $deviceIndex)
+    private function setUserDeviceRecord(array $deviceList, bool $deviceIndex)
     {
         $userDevice = null;
         $token = null;
