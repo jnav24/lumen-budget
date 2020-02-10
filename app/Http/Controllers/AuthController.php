@@ -286,7 +286,14 @@ class AuthController extends Controller
         }
     }
 
-    public function verifyToken($id, $token)
+    /**
+     * Verify token if still active
+     *
+     * @param string $id
+     * @param string $token
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
+    public function verifyToken(string $id, string $token)
     {
         try {
             if (!is_numeric($id)) {
@@ -322,6 +329,9 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
     public function submitVerifyToken()
     {
         try {
@@ -337,13 +347,15 @@ class AuthController extends Controller
                 ->whereNull('verified_at')
                 ->first();
 
-            if (!empty($device)) {
+            $isNotExpired = Carbon::createFromTimeString($device->expires_at)->gt(Carbon::now());
+
+            if (!empty($device) && $isNotExpired) {
                 $device->verified_at = Carbon::now();
                 $device->save();
                 return $this->respondWithOK([], 'Verification completed successfully!');
             }
 
-            return $this->respondWithBadRequest();
+            return $this->respondWithBadRequest([], 'The info you provided is either incorrect, expired or does not exist');
         } catch (ValidationException $e) {
             return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
         } catch (\Exception $e) {
@@ -352,6 +364,11 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * Resend verify token to email; occurs on expired token
+     *
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
     public function resendVerifyToken()
     {
         try {
@@ -365,14 +382,14 @@ class AuthController extends Controller
 
             if (!empty($device)) {
                 $device->verify_secret = GlobalHelper::generateSecret();
-                $device->verify_token = GlobalHelper::generateSecret(64);
+                $device->verify_token = GlobalHelper::generateToken(64);
                 $device->expires_at = Carbon::now()->addMinutes(30);
                 $device->save();
                 // @todo send email; add to queue
                 return $this->respondWithOK();
             }
 
-            return $this->respondWithBadRequest();
+            return $this->respondWithBadRequest([], 'The token either has expired or does not exist');
         } catch (ValidationException $e) {
             return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
         } catch (\Exception $e) {
