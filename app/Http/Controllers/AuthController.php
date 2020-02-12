@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\GlobalHelper;
+use App\Mail\VerifyTokenMailable;
 use App\Models\User;
 use App\Models\UserDevice;
 use App\Models\UserProfile;
@@ -137,37 +138,41 @@ class AuthController extends Controller
 
     public function currentUser()
     {
-        $user = $this->request->auth;
-        $verifyList = [];
+        try {
+            $user = $this->request->auth;
+            $verifyList = [];
 
-        $deviceList = $user->devices->toArray();
-        $deviceIndex = array_search($this->request->ip(), array_column($deviceList, 'ip'));
+            $deviceList = $user->devices->toArray();
+            $deviceIndex = array_search($this->request->ip(), array_column($deviceList, 'ip'));
 
-        // @todo check db where ip user_id and device matches, if it exists, return that
-        // otherwise create a new record
-        // the problem is that when a user signs in, it updates the current user_device record
+            // @todo check db where ip user_id and device matches, if it exists, return that
+            // otherwise create a new record
+            // the problem is that when a user signs in, it updates the current user_device record
 
-        if ($deviceIndex === false || empty($deviceList[$deviceIndex]['verified_at'])) {
-            $token = $this->setUserDeviceRecord($deviceList, $deviceIndex);
-            // @todo add mail to the queue
-            // GlobalHelper::sendMailable($user->username, new ForgotPasswordMailable($user)); example of sending an email
+            if ($deviceIndex === false || empty($deviceList[$deviceIndex]['verified_at'])) {
+                $userDevice = $this->setUserDeviceRecord($deviceList, $deviceIndex);
+                GlobalHelper::sendMailable($user->username, new VerifyTokenMailable($user, $userDevice));
 
-            $verifyList = [
-                'token' => $token,
-            ];
+                $verifyList = [
+                    'token' => $userDevice->verify_token,
+                ];
+            }
+
+
+            $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
+            $vehicles = UserVehicles::where('user_id', $user->id)->get()->toArray();
+
+            return $this->respondWithOK([
+                'user' => [
+                        'email' => $user->username,
+                    ] + $userProfile,
+                'vehicles' => $vehicles,
+                'verify' => $verifyList,
+            ]);
+        } catch(\Exception $e) {
+            Log::debug('AuthController::currentUser - ' . $e->getMessage());
+            return $this->respondWithBadRequest([], 'Something unexpected has occurred');
         }
-
-
-        $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
-        $vehicles = UserVehicles::where('user_id', $user->id)->get()->toArray();
-
-        return $this->respondWithOK([
-            'user' => [
-                'email' => $user->username,
-            ] + $userProfile,
-            'vehicles' => $vehicles,
-            'verify' => $verifyList,
-        ]);
     }
 
     public function forgetPassword()
@@ -403,12 +408,11 @@ class AuthController extends Controller
      *
      * @param $deviceList
      * @param bool $deviceIndex
-     * @return string
+     * @return UserDevice
      */
     private function setUserDeviceRecord(array $deviceList, bool $deviceIndex)
     {
         $userDevice = null;
-        $token = null;
 
         if (!empty($deviceList[$deviceIndex]['id'])) {
             $userDevice = UserDevice::find($deviceList[$deviceIndex]['id']);
@@ -416,18 +420,15 @@ class AuthController extends Controller
 
         if (empty($userDevice)) {
             $userDevice = new UserDevice();
-            $token = GlobalHelper::generateToken(64);
-        } else {
-            return $userDevice->verify_token;
+            $userDevice->user_id = $this->request->auth->id;
+            $userDevice->ip = $this->request->ip();
+            $userDevice->agent = $this->request->header('user-agent');
+            $userDevice->verify_secret = GlobalHelper::generateSecret();
+            $userDevice->verify_token = GlobalHelper::generateToken(64);
+            $userDevice->expires_at = Carbon::now()->addMinutes(30);
+            $userDevice->save();
         }
 
-        $userDevice->user_id = $this->request->auth->id;
-        $userDevice->ip = $this->request->ip();
-        $userDevice->agent = $this->request->header('user-agent');
-        $userDevice->verify_secret = GlobalHelper::generateSecret();
-        $userDevice->verify_token = $token;
-        $userDevice->expires_at = Carbon::now()->addMinutes(30);
-        $userDevice->save();
-        return $token;
+        return $userDevice;
     }
 }
