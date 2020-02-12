@@ -7,7 +7,7 @@ $router->get('/', function () use ($router) {
 /**
  * User Auth
  */
-$router->group(['middleware' => 'user.ip'], function ($router) {
+$router->group([], function ($router) {
     $router->post('auth/login', 'AuthController@authenticate');
     $router->post('register', 'AuthController@register');
     $router->post('auth/forgetpassword','AuthController@forgetPassword');
