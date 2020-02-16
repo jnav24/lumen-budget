@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\GlobalHelper;
+use App\Mail\VerifyTokenMailable;
 use App\Models\User;
+use App\Models\UserDevice;
 use App\Models\UserProfile;
 use App\Models\UserVehicles;
+use Carbon\Carbon;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use App\Mail\ForgotPasswordMailable;
 
@@ -50,19 +54,28 @@ class AuthController extends Controller
             }
 
             if (Hash::check($this->request->input('password'), $user->password)) {
-                $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
-                $vehicles = UserVehicles::where('user_id', $user->id)->get()->toArray();
+                $device = UserDevice::getRequestedDevice($this->request, $user->id);
 
-                if (!$userProfile) {
-                    return $this->respondWithBadRequest([], 'There is a problem with your account. Please contact the administrator.');
+                if (empty($device)) {
+                    $device = $this->setUserDeviceRecord($user->id);
+                }
+
+                if ($this->isDeviceExpired($device)) {
+                    $device->verify_secret = GlobalHelper::generateSecret();
+                    $device->verify_token = GlobalHelper::generateToken(64);
+                    $device->expires_at = Carbon::now()->addMinutes(30);
+                    $device->save();
+                }
+
+                if ($this->isNotValidDevice($device)) {
+                    GlobalHelper::sendMailable(
+                        $user->username,
+                        new VerifyTokenMailable($user, $device)
+                    );
                 }
 
                 return $this->respondWithOK([
                     'token' => $this->jwt($user),
-                    'user' => [
-                        'email' => $user->username,
-                    ] + $userProfile,
-                    'vehicles' => $vehicles,
                 ]);
             }
 
@@ -132,16 +145,35 @@ class AuthController extends Controller
 
     public function currentUser()
     {
-        $user = $this->request->auth;
-        $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
-        $vehicles = UserVehicles::where('user_id', $user->id)->get()->toArray();
+        try {
+            $user = $this->request->auth;
+            $verifyList = [];
+            $device = UserDevice::getRequestedDevice($this->request, $user->id);
 
-        return $this->respondWithOK([
-            'user' => [
-                'email' => $user->username,
-            ] + $userProfile,
-            'vehicles' => $vehicles,
-        ]);
+            if (empty($device)) {
+                $device = $this->setUserDeviceRecord($user->id);
+            }
+
+            if ($this->isNotValidDevice($device)) {
+                $verifyList = [
+                    'token' => $device->verify_token,
+                ];
+            }
+
+            $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
+            $vehicles = UserVehicles::where('user_id', $user->id)->get()->toArray();
+
+            return $this->respondWithOK([
+                'user' => [
+                        'email' => $user->username,
+                    ] + $userProfile,
+                'vehicles' => $vehicles,
+                'verify' => $verifyList,
+            ]);
+        } catch(\Exception $e) {
+            Log::debug('AuthController::currentUser - ' . $e->getMessage());
+            return $this->respondWithBadRequest([], 'Something unexpected has occurred');
+        }
     }
 
     public function forgetPassword()
@@ -258,5 +290,150 @@ class AuthController extends Controller
         } catch (\Exception $ex) {
             return $this->respondWithBadRequest([], 'Unable to validate reset password token at this time.');
         }
+    }
+
+    /**
+     * Verify token if still active
+     *
+     * @param string $id
+     * @param string $token
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
+    public function verifyToken(string $id, string $token)
+    {
+        try {
+            if (!is_numeric($id)) {
+                return $this->respondWithBadRequest([], 'Token or user does not exist');
+            }
+
+            $user = User::with('devices')->find($id);
+
+            if (empty($user)) {
+                return $this->respondWithBadRequest([], 'Token or user does not exist');
+            }
+
+            $devices = $user->devices;
+            $index = $devices
+                ->pluck('verify_token')
+                ->search($token);
+
+            if ($index === false) {
+                return $this->respondWithBadRequest([], 'Token or user does not exist');
+            }
+
+            $device = $devices->splice($index, 1)->shift();
+
+            if (!empty($device->verified_at)) {
+                return $this->respondWithBadRequest([], 'Token is no longer valid');
+            }
+
+            return $this->respondWithOK([
+                'expires_at' => $device->expires_at,
+            ]);
+        } catch (ValidationException $e) {
+            return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
+        }
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
+    public function submitVerifyToken()
+    {
+        try {
+            $valid = $this->validate($this->request, [
+                'id' => 'required|numeric',
+                'token' => 'required|alpha_num',
+                'verify' => 'required|alpha_num',
+            ]);
+
+            $device = UserDevice::where('user_id', $valid['id'])
+                ->where('verify_token', $valid['token'])
+                ->where('verify_secret', $valid['verify'])
+                ->whereNull('verified_at')
+                ->first();
+
+            $isNotExpired = Carbon::createFromTimeString($device->expires_at)->gt(Carbon::now());
+
+            if (!empty($device) && $isNotExpired) {
+                $device->expires_at = Carbon::now();
+                $device->verified_at = Carbon::now();
+                $device->save();
+                return $this->respondWithOK([], 'Verification completed successfully!');
+            }
+
+            return $this->respondWithBadRequest([], 'The info you provided is either incorrect, expired or does not exist');
+        } catch (ValidationException $e) {
+            return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
+        } catch (\Exception $e) {
+            Log::error('AuthController::submitVerifyToken - ' . $e->getMessage());
+            return $this->respondWithBadRequest([], 'Something unexpected has occurred');
+        }
+    }
+
+    /**
+     * Resend verify token to email; occurs on expired token
+     *
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
+    public function resendVerifyToken()
+    {
+        try {
+            $valid = $this->validate($this->request, [
+                'id' => 'required|numeric',
+                'token' => 'required|alpha_num',
+            ]);
+
+            $user = User::find($valid['id']);
+            $device = UserDevice::getRequestedDevice($this->request, $user->id);
+
+            if (!empty($device)) {
+                $device->verify_secret = GlobalHelper::generateSecret();
+                $device->verify_token = GlobalHelper::generateToken(64);
+                $device->expires_at = Carbon::now()->addMinutes(30);
+                $device->save();
+                GlobalHelper::sendMailable(
+                    $user->username,
+                    new VerifyTokenMailable($user, $device)
+                );
+                return $this->respondWithOK();
+            }
+
+            return $this->respondWithBadRequest([], 'The token either has expired or does not exist');
+        } catch (ValidationException $e) {
+            return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
+        } catch (\Exception $e) {
+            Log::error('AuthController::resendVerifyToken - ' . $e->getMessage());
+            return $this->respondWithBadRequest([], 'Something unexpected has occurred');
+        }
+    }
+
+    /**
+     * Create device record and returns token
+     *
+     * @return UserDevice
+     */
+    private function setUserDeviceRecord($id)
+    {
+        $userDevice = new UserDevice();
+        $userDevice->user_id = $id;
+        $userDevice->ip = $this->request->ip();
+        $userDevice->agent = $this->request->header('user-agent');
+        $userDevice->verify_secret = GlobalHelper::generateSecret();
+        $userDevice->verify_token = GlobalHelper::generateToken(64);
+        $userDevice->expires_at = Carbon::now()->addMinutes(30);
+        $userDevice->save();
+
+        return $userDevice;
+    }
+
+    private function isNotValidDevice($device): bool
+    {
+        return empty($device->verified_at);
+    }
+
+    private function isDeviceExpired($device): bool
+    {
+        return Carbon::createFromTimeString($device->expires_at)->lt(Carbon::now());
     }
 }

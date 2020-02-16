@@ -65,4 +65,14 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         return $this->hasMany(UserVehicles::class, 'user_id', 'id');
     }
+
+    /**
+     * Get User Ips
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function devices()
+    {
+        return $this->hasMany(UserDevice::class, 'user_id', 'id');
+    }
 }
