@@ -426,7 +426,7 @@ class AuthController extends Controller
 
     private function isNotValidDevice($device): bool
     {
-        return empty($device->verify_at);
+        return empty($device->verified_at);
     }
 
     private function isDeviceExpired($device): bool
