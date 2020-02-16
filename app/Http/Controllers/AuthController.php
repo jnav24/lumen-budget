@@ -385,14 +385,17 @@ class AuthController extends Controller
             ]);
 
             $user = User::find($valid['id']);
-            $device = $user->devices->where('verify_token', $valid['token'])->first();
+            $device = UserDevice::getRequestedDevice($this->request, $user->id);
 
             if (!empty($device)) {
                 $device->verify_secret = GlobalHelper::generateSecret();
                 $device->verify_token = GlobalHelper::generateToken(64);
                 $device->expires_at = Carbon::now()->addMinutes(30);
                 $device->save();
-                // @todo send email; add to queue
+                GlobalHelper::sendMailable(
+                    $user->username,
+                    new VerifyTokenMailable($user, $device)
+                );
                 return $this->respondWithOK();
             }
 
