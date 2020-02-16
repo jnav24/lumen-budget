@@ -37,7 +37,7 @@ class VerifyTokenMailable extends Mailable
      */
     public function build()
     {
-        return $this->subject('[Dime Budget] Verify Your Account')
+        return $this->subject('Verify Your Account')
             ->from(env('MAIL_FROM_ADDRESS'), env('APP_NAME'))
             ->replyTo(env('MAIL_REPLY_TO_ADDRESS'), env('APP_NAME'))
             ->view('emails.auth.verify');

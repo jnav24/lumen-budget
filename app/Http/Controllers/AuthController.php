@@ -54,21 +54,32 @@ class AuthController extends Controller
             }
 
             if (Hash::check($this->request->input('password'), $user->password)) {
-                // @todo remove calls to user profile and vehicle because its not necessary since user data is provided in another method
-                $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
-                $vehicles = UserVehicles::where('user_id', $user->id)->get()->toArray();
+                $device = UserDevice::getRequestedDevice($this->request, $user->id);
 
-                if (!$userProfile) {
-                    return $this->respondWithBadRequest([], 'There is a problem with your account. Please contact the administrator.');
+                if (empty($device)) {
+                    $device = $this->setUserDeviceRecord($user->id);
+                    GlobalHelper::sendMailable(
+                        $user->username,
+                        new VerifyTokenMailable($user, $device)
+                    );
+                } else {
+                    if ($this->isDeviceExpired($device)) {
+                        $device->verify_secret = GlobalHelper::generateSecret();
+                        $device->verify_token = GlobalHelper::generateToken(64);
+                        $device->expires_at = Carbon::now()->addMinutes(30);
+                        $device->save();
+                    }
+
+                    if ($this->isNotValidDevice($device)) {
+                        GlobalHelper::sendMailable(
+                            $user->username,
+                            new VerifyTokenMailable($user, $device)
+                        );
+                    }
                 }
 
-                // @todo only return token because current user returns that info
                 return $this->respondWithOK([
                     'token' => $this->jwt($user),
-                    'user' => [
-                        'email' => $user->username,
-                    ] + $userProfile,
-                    'vehicles' => $vehicles,
                 ]);
             }
 
@@ -141,23 +152,17 @@ class AuthController extends Controller
         try {
             $user = $this->request->auth;
             $verifyList = [];
+            $device = UserDevice::getRequestedDevice($this->request, $user->id);
 
-            $deviceList = $user->devices->toArray();
-            $deviceIndex = array_search($this->request->ip(), array_column($deviceList, 'ip'));
-
-            // @todo check db where ip user_id and device matches, if it exists, return that
-            // otherwise create a new record
-            // the problem is that when a user signs in, it updates the current user_device record
-
-            if ($deviceIndex === false || empty($deviceList[$deviceIndex]['verified_at'])) {
-                $userDevice = $this->setUserDeviceRecord($deviceList, $deviceIndex);
-                GlobalHelper::sendMailable($user->username, new VerifyTokenMailable($user, $userDevice));
-
-                $verifyList = [
-                    'token' => $userDevice->verify_token,
-                ];
+            if (empty($device)) {
+                $device = $this->setUserDeviceRecord($user->id);
             }
 
+            if ($this->isNotValidDevice($device)) {
+                $verifyList = [
+                    'token' => $device->verify_token,
+                ];
+            }
 
             $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
             $vehicles = UserVehicles::where('user_id', $user->id)->get()->toArray();
@@ -355,6 +360,7 @@ class AuthController extends Controller
             $isNotExpired = Carbon::createFromTimeString($device->expires_at)->gt(Carbon::now());
 
             if (!empty($device) && $isNotExpired) {
+                $device->expires_at = Carbon::now();
                 $device->verified_at = Carbon::now();
                 $device->save();
                 return $this->respondWithOK([], 'Verification completed successfully!');
@@ -406,29 +412,29 @@ class AuthController extends Controller
     /**
      * Create device record and returns token
      *
-     * @param $deviceList
-     * @param bool $deviceIndex
      * @return UserDevice
      */
-    private function setUserDeviceRecord(array $deviceList, bool $deviceIndex)
+    private function setUserDeviceRecord($id)
     {
-        $userDevice = null;
-
-        if (!empty($deviceList[$deviceIndex]['id'])) {
-            $userDevice = UserDevice::find($deviceList[$deviceIndex]['id']);
-        }
-
-        if (empty($userDevice)) {
-            $userDevice = new UserDevice();
-            $userDevice->user_id = $this->request->auth->id;
-            $userDevice->ip = $this->request->ip();
-            $userDevice->agent = $this->request->header('user-agent');
-            $userDevice->verify_secret = GlobalHelper::generateSecret();
-            $userDevice->verify_token = GlobalHelper::generateToken(64);
-            $userDevice->expires_at = Carbon::now()->addMinutes(30);
-            $userDevice->save();
-        }
+        $userDevice = new UserDevice();
+        $userDevice->user_id = $id;
+        $userDevice->ip = $this->request->ip();
+        $userDevice->agent = $this->request->header('user-agent');
+        $userDevice->verify_secret = GlobalHelper::generateSecret();
+        $userDevice->verify_token = GlobalHelper::generateToken(64);
+        $userDevice->expires_at = Carbon::now()->addMinutes(30);
+        $userDevice->save();
 
         return $userDevice;
+    }
+
+    private function isNotValidDevice($device): bool
+    {
+        return empty($device->verify_at);
+    }
+
+    private function isDeviceExpired($device): bool
+    {
+        return Carbon::createFromTimeString($device->expires_at)->lt(Carbon::now());
     }
 }
