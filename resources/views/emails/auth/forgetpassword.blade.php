@@ -6,9 +6,8 @@
             <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
                 <tr>
                     <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;" align="center">
-                        <img src="https://s3.amazonaws.com/{{ env('AWS_S3_BUCKET') }}/emails/banner.jpg" style="margin: 0; Margin-bottom: 15px;" height="232" width="574" class="img-responsive" />
-                        <p style="font-family: sans-serif; font-size: 18px; font-weight: bold; margin: 0; Margin-bottom: 15px;">Hi {{ $user->profile->first_name }} {{ $user->profile->last_name }}!</p>
-                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 30px;">If you've lost your password or wish to reset it, use the link below to get started.</p>
+                        <p style="font-family: sans-serif; font-size: 18px; font-weight: bold; margin: 0; margin-bottom: 15px;">Hi {{ $user->profile->first_name }} {{ $user->profile->last_name }}!</p>
+                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 30px;">We've received a request to reset your password. If you made this request, please use the link below to change your password.</p>
                         <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; box-sizing: border-box;">
                             <tbody>
                             <tr>
