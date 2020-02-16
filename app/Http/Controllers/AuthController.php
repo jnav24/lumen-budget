@@ -58,24 +58,20 @@ class AuthController extends Controller
 
                 if (empty($device)) {
                     $device = $this->setUserDeviceRecord($user->id);
+                }
+
+                if ($this->isDeviceExpired($device)) {
+                    $device->verify_secret = GlobalHelper::generateSecret();
+                    $device->verify_token = GlobalHelper::generateToken(64);
+                    $device->expires_at = Carbon::now()->addMinutes(30);
+                    $device->save();
+                }
+
+                if ($this->isNotValidDevice($device)) {
                     GlobalHelper::sendMailable(
                         $user->username,
                         new VerifyTokenMailable($user, $device)
                     );
-                } else {
-                    if ($this->isDeviceExpired($device)) {
-                        $device->verify_secret = GlobalHelper::generateSecret();
-                        $device->verify_token = GlobalHelper::generateToken(64);
-                        $device->expires_at = Carbon::now()->addMinutes(30);
-                        $device->save();
-                    }
-
-                    if ($this->isNotValidDevice($device)) {
-                        GlobalHelper::sendMailable(
-                            $user->username,
-                            new VerifyTokenMailable($user, $device)
-                        );
-                    }
                 }
 
                 return $this->respondWithOK([
