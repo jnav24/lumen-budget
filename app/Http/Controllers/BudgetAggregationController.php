@@ -7,6 +7,7 @@ use App\Models\CreditCards;
 use App\Models\Medical;
 use App\Models\Miscellaneous;
 use App\Models\Utilities;
+use App\Models\Vehicles;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -69,6 +70,7 @@ class BudgetAggregationController extends Controller
             $utilities = 0;
             $misc = 0;
             $medical = 0;
+            $vehicles = 0;
 
             if (!empty($budget)) {
                 $budget = $budget[0];
@@ -96,6 +98,15 @@ class BudgetAggregationController extends Controller
                     })
                     ->where('budget_id', $budget['id'])
                     ->count();
+                $vehicles = Vehicles::with(['type' => function ($relation) {
+                        $relation->whereIn('slug', ['finance', 'lease']);
+                    }])
+                    ->where(function ($query) {
+                        $query->whereNull('confirmation')
+                            ->orWhere('confirmation', '');
+                    })
+                    ->where('budget_id', $budget['id'])
+                    ->count();
             }
 
 
@@ -107,6 +118,7 @@ class BudgetAggregationController extends Controller
                         'medical' => $medical,
                         'miscellaneous' => $misc,
                         'utilities' => $utilities,
+                        'vehicles' => $vehicles,
                     ],
                 ],
             ]);
