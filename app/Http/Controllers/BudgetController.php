@@ -708,4 +708,26 @@ class BudgetController extends Controller
     private function get_one_time($job, $startPay, $currentMonth) {
         return $job;
     }
+
+    /**
+     * Get one time payment billing cycle; called dynamically from generatePaidExpenses()
+     *
+     * @param array $job {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     * @param Carbon $startPay
+     * @param Carbon $currentMonth
+     * @return array {
+     *      @value string ['name']
+     *      @value string ['amount']
+     *      @value integer ['job_type_id']
+     *      @value Datetime ['initial_pay_date']
+     * }
+     */
+    private function get_rsu($job, $startPay, $currentMonth) {
+        return $job;
+    }
 }
