@@ -15,7 +15,7 @@ class AddRsuType extends Migration
     public function up()
     {
 
-        DB::table('job_types')->insert([
+        DB::table('investment_types')->insert([
             ['name' => 'Restricted Stock', 'slug' => 'rsu', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()],
         ]);
     }
