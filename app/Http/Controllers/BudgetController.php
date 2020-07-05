@@ -48,8 +48,6 @@ class BudgetController extends Controller
                         'name' => $budget->name,
                         'budget_cycle' => $budget->budget_cycle,
                     ], $saved->shift()->toArray()));
-                })->groupBy(function ($item, $key) {
-                    return Carbon::createFromTimeString($item->toArray()['budget_cycle'])->format('Y');
                 }),
             ]);
         } catch (\Exception $e) {
