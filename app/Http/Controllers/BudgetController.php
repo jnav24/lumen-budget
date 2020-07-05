@@ -27,9 +27,30 @@ class BudgetController extends Controller
     public function getAllBudgets()
     {
         try {
-            $data = Budgets::where('user_id', $this->request->auth->id)->orderBy('id', 'desc')->get();
+            $data = Budgets::where('user_id', $this->request->auth->id)
+                ->with(['aggregations' => function ($query) {
+                    $query->where('type', 'saved');
+                }])
+                ->orderBy('id', 'desc')
+                ->get();
+
+            // @todo the shorthand to get only aggregrations.value doesn't work, created this map instead
             return $this->respondWithOK([
-                'templates' => $data,
+                'budgets' => $data->map(function ($budget) {
+                    $saved = $budget->aggregations->map(function ($aggregation) {
+                        return collect([
+                            'saved' => $aggregation->value,
+                        ]);
+                    });
+
+                    return collect(array_merge([
+                        'id' => $budget->id,
+                        'name' => $budget->name,
+                        'budget_cycle' => $budget->budget_cycle,
+                    ], $saved->shift()->toArray()));
+                })->groupBy(function ($item, $key) {
+                    return Carbon::createFromTimeString($item->toArray()['budget_cycle'])->format('Y');
+                }),
             ]);
         } catch (\Exception $e) {
             Log::error('BudgetController::getAllBudgets - ' . $e->getMessage());
