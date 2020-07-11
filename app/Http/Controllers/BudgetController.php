@@ -69,6 +69,9 @@ class BudgetController extends Controller
                 ->with('miscellaneous')
                 ->with('utilities')
                 ->with('vehicles')
+                ->with(['aggregations' => function ($query) {
+                    $query->where('type', 'saved');
+                }])
                 ->first();
 
             return $this->respondWithOK([
@@ -86,6 +89,7 @@ class BudgetController extends Controller
                         'utilities' => $data['utilities'],
                         'vehicles' => $data['vehicles'],
                     ],
+                    'saved' => $data['aggregations']->shift()->value,
                 ],
             ]);
         } catch (\Exception $e) {
@@ -141,6 +145,9 @@ class BudgetController extends Controller
             }
 
             $this->setupAndSaveAggregation($budget->id, $expenses);
+            $saved = $budget->aggregations->filter(function ($value, $key) {
+                return $value->type === 'saved';
+            });
             DB::commit();
 
             return $this->respondWithOK([
@@ -150,6 +157,7 @@ class BudgetController extends Controller
                     'budget_cycle' => $budget->budget_cycle,
                     'created_at' => $budget->created_at->toDateTimeString(),
                     'expenses' => $returnExpenses,
+                    'saved' => $saved->shift()->value,
                 ],
             ]);
         } catch (ValidationException $e) {
