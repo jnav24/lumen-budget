@@ -51,7 +51,7 @@ class CreateEducation extends Migration
                 $table->timestamps();
             });
 
-            Schema::table('banks', function($table) {
+            Schema::table('education_templates', function($table) {
                 $table->foreign('education_type_id')
                     ->references('id')
                     ->on('education_types')
