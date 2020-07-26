@@ -54,7 +54,7 @@ class CreateHousing extends Migration
             Schema::table('housing_templates', function($table) {
                 $table->foreign('housing_type_id')
                     ->references('id')
-                    ->on('food_types')
+                    ->on('housing_types')
                     ->onDelete('cascade');
 
                 $table->foreign('budget_template_id')
