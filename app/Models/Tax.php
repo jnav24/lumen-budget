@@ -30,6 +30,6 @@ class Tax extends Model
      */
     public function type()
     {
-        return $this->hasOne(TaxTypes::class, 'id', 'tax_type_id');
+        return $this->hasOne(TaxType::class, 'id', 'tax_type_id');
     }
 }

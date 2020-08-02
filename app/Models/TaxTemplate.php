@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TaxTemplates extends Model
+class TaxTemplate extends Model
 {
     /**
      * Hide columns
