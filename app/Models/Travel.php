@@ -30,6 +30,6 @@ class Travel extends Model
      */
     public function type()
     {
-        return $this->hasOne(BankTypes::class, 'id', 'bank_type_id');
+        return $this->hasOne(TravelType::class, 'id', 'bank_type_id');
     }
 }
