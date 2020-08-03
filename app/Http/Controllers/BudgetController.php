@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Banks;
+use App\Models\BillTypes;
 use App\Models\BudgetAggregation;
 use App\Models\Budgets;
 use App\Models\CreditCards;
@@ -59,36 +60,34 @@ class BudgetController extends Controller
     public function getSingleBudgetExpenses($id)
     {
         try {
-            $data = Budgets::where('user_id', $this->request->auth->id)
+            $expenses = [];
+            $types = BillTypes::all();
+            $slugs = $types->pluck('slug');
+
+            $sql = Budgets::where('user_id', $this->request->auth->id)
                 ->where('id', $id)
-                ->with('banks')
-                ->with('credit_cards')
-                ->with('investments')
-                ->with('jobs')
-                ->with('medical')
-                ->with('miscellaneous')
-                ->with('utilities')
-                ->with('vehicles')
                 ->with(['aggregations' => function ($query) {
                     $query->where('type', 'saved');
-                }])
-                ->first();
+                }]);
+
+            foreach ($slugs as $slug) {
+                $sql->with($slug);
+            }
+
+            $data = $sql->first();
+
+            foreach ($slugs as $slug) {
+                if ($data->{$slug}->isNotEmpty()) {
+                    $expenses[$slug] = $data->{$slug}->toArray();
+                }
+            }
 
             return $this->respondWithOK([
                 'budget' => [
                     'id' => $id,
                     'name' => $data['name'],
                     'budget_cycle' => $data['budget_cycle'],
-                    'expenses' => [
-                        'banks' => $data['banks'],
-                        'credit_cards' => $data['credit_cards'],
-                        'investments' => $data['investments'],
-                        'jobs' => $data['jobs'],
-                        'medical' => $data['medical'],
-                        'miscellaneous' => $data['miscellaneous'],
-                        'utilities' => $data['utilities'],
-                        'vehicles' => $data['vehicles'],
-                    ],
+                    'expenses' => $expenses,
                     'saved' => $data['aggregations']->shift()->value,
                 ],
             ]);
