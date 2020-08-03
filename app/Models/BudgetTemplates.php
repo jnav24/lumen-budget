@@ -50,7 +50,7 @@ class BudgetTemplates extends Model
      */
     public function jobs()
     {
-        return $this->hasMany('App\Models\JobTemplates', 'budget_template_id', 'id');
+        return $this->hasMany('App\Models\IncomeTemplate', 'budget_template_id', 'id');
     }
 
     /**

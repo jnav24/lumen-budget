@@ -8,8 +8,8 @@ use App\Models\BudgetAggregation;
 use App\Models\Budgets;
 use App\Models\CreditCards;
 use App\Models\Investments;
-use App\Models\Jobs;
-use App\Models\JobTypes;
+use App\Models\Income;
+use App\Models\IncomeType;
 use App\Models\Medical;
 use App\Models\Miscellaneous;
 use App\Models\Utilities;
@@ -173,7 +173,7 @@ class BudgetController extends Controller
             Banks::where($this->tableId, $id)->delete();
             CreditCards::where($this->tableId, $id)->delete();
             Investments::where($this->tableId, $id)->delete();
-            Jobs::where($this->tableId, $id)->delete();
+            Income::where($this->tableId, $id)->delete();
             Medical::where($this->tableId, $id)->delete();
             Miscellaneous::where($this->tableId, $id)->delete();
             Utilities::where($this->tableId, $id)->delete();
@@ -504,7 +504,7 @@ class BudgetController extends Controller
         $results = [];
 
         foreach ($expenses as $job) {
-            $type = JobTypes::find($job['job_type_id'])->toArray();
+            $type = IncomeType::find($job['job_type_id'])->toArray();
             $startPay = Carbon::createFromTimeString($job['initial_pay_date']);
 
 

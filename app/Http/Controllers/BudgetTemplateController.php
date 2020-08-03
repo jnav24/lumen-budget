@@ -6,7 +6,7 @@ use App\Models\BankTemplates;
 use App\Models\BudgetTemplates;
 use App\Models\CreditCardTemplates;
 use App\Models\InvestmentTemplates;
-use App\Models\JobTemplates;
+use App\Models\IncomeTemplate;
 use App\Models\MedicalTemplates;
 use App\Models\MiscellaneousTemplates;
 use App\Models\UtilityTemplates;
@@ -168,7 +168,7 @@ class BudgetTemplateController extends Controller
      */
     private function delete_jobs_templates(int $id)
     {
-        if (empty(JobTemplates::find($id)->delete())) {
+        if (empty(IncomeTemplate::find($id)->delete())) {
             throw new \Exception();
         }
     }

@@ -6,7 +6,7 @@ use App\Models\BankTypes;
 use App\Models\BillTypes;
 use App\Models\CreditCardTypes;
 use App\Models\InvestmentTypes;
-use App\Models\JobTypes;
+use App\Models\IncomeType;
 use App\Models\MedicalTypes;
 use App\Models\UtilityTypes;
 use App\Models\VehicleTypes;
@@ -81,7 +81,7 @@ class TypesController extends Controller
     public function job()
     {
         try {
-            $types = ['types' => JobTypes::all()->toArray()];
+            $types = ['types' => IncomeType::all()->toArray()];
             return $this->respondWithOK($types);
         } catch (\Exception $e) {
             return $this->respondWithBadRequest([], 'Unable to retrieve job types at this time.');
