@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class JobTemplates extends Model
+class IncomeTemplate extends Model
 {
     /**
      * Hide columns
@@ -22,5 +22,5 @@ class JobTemplates extends Model
      *
      * @var string
      */
-    protected $table = 'job_templates';
+    protected $table = 'income_templates';
 }

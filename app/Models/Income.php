@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Jobs extends Model
+class Income extends Model
 {
     /**
      * Hide columns
@@ -23,13 +23,13 @@ class Jobs extends Model
      *
      * @var string
      */
-    protected $table = 'jobs';
+    protected $table = 'incomes';
 
     /**
      * @return HasOne
      */
     public function type()
     {
-        return $this->hasOne(JobTypes::class, 'id', 'job_type_id');
+        return $this->hasOne(IncomeType::class, 'id', 'job_type_id');
     }
 }
