@@ -23,7 +23,7 @@ class Subscription extends Model
      *
      * @var string
      */
-    protected $table = 'subscription';
+    protected $table = 'subscriptions';
 
     /**
      * @return HasOne

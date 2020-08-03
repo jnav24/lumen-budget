@@ -23,7 +23,7 @@ class Loan extends Model
      *
      * @var string
      */
-    protected $table = 'loan';
+    protected $table = 'loans';
 
     /**
      * @return HasOne
