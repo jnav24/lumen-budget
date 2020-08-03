@@ -30,6 +30,6 @@ class Income extends Model
      */
     public function type()
     {
-        return $this->hasOne(IncomeType::class, 'id', 'job_type_id');
+        return $this->hasOne(IncomeType::class, 'id', 'income_type_id');
     }
 }

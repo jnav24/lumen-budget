@@ -123,7 +123,7 @@ class Controller extends BaseController
 
     protected function getJobsAttributes()
     {
-        return ['id', 'name', 'amount', 'job_type_id', 'initial_pay_date'];
+        return ['id', 'name', 'amount', 'income_type_id', 'initial_pay_date'];
     }
 
     protected function getMedicalAttributes()

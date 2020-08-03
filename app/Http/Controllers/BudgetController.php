@@ -279,14 +279,14 @@ class BudgetController extends Controller
      *      @value integer ['id'] (optional)
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      * @return array {
      *      @value integer ['id']
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      */
@@ -488,13 +488,13 @@ class BudgetController extends Controller
      * @param array $expenses {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      * @return array {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      */
@@ -504,7 +504,7 @@ class BudgetController extends Controller
         $results = [];
 
         foreach ($expenses as $job) {
-            $type = IncomeType::find($job['job_type_id'])->toArray();
+            $type = IncomeType::find($job['income_type_id'])->toArray();
             $startPay = Carbon::createFromTimeString($job['initial_pay_date']);
 
 
@@ -525,7 +525,7 @@ class BudgetController extends Controller
      *      @value integer | string ['id']
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      * @param Carbon $startPay
@@ -534,7 +534,7 @@ class BudgetController extends Controller
      *      @value integer | string ['id']
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      */
@@ -568,7 +568,7 @@ class BudgetController extends Controller
                     'id' => $job['id'],
                     'name' => $job['name'],
                     'amount' => $job['amount'],
-                    'job_type_id' => $job['job_type_id'],
+                    'income_type_id' => $job['income_type_id'],
                     'initial_pay_date' => $initialDate->toDateTimeString(),
                 ];
             }
@@ -586,7 +586,7 @@ class BudgetController extends Controller
      *      @value string ['id']; a temp id is expected
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      * @param Carbon $startPay
@@ -594,7 +594,7 @@ class BudgetController extends Controller
      * @return array {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      */
@@ -630,7 +630,7 @@ class BudgetController extends Controller
                     'id' => $job['id'],
                     'name' => $job['name'],
                     'amount' => $job['amount'],
-                    'job_type_id' => $job['job_type_id'],
+                    'income_type_id' => $job['income_type_id'],
                     'initial_pay_date' => $payWeek->toDateTimeString(),
                     'int' => $i,
                 ];
@@ -647,7 +647,7 @@ class BudgetController extends Controller
      * @param array $job {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      * @param Carbon $startPay
@@ -655,7 +655,7 @@ class BudgetController extends Controller
      * @return array {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      */
@@ -681,7 +681,7 @@ class BudgetController extends Controller
      * @param array $job {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      * @param Carbon $startPay
@@ -689,7 +689,7 @@ class BudgetController extends Controller
      * @return array {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      */
@@ -708,7 +708,7 @@ class BudgetController extends Controller
             'id' => $job['id'],
             'name' => $job['name'],
             'amount' => $job['amount'],
-            'job_type_id' => $job['job_type_id'],
+            'income_type_id' => $job['income_type_id'],
             'initial_pay_date' => $date->toDateTimeString(),
         ];
     }
@@ -719,7 +719,7 @@ class BudgetController extends Controller
      * @param array $job {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      * @param Carbon $startPay
@@ -727,7 +727,7 @@ class BudgetController extends Controller
      * @return array {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      */
