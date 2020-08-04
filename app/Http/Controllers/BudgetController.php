@@ -22,7 +22,15 @@ use Illuminate\Validation\ValidationException;
 class BudgetController extends Controller
 {
     protected $tableId = 'budget_id';
+    /**
+     * @deprecated get from BillTypes
+     * @var array
+     */
     private $earned = ['jobs'];
+    /**
+     * @deprecated get from BillTypes
+     * @var array
+     */
     private $spent = ['credit_cards', 'medical', 'miscellaneous', 'utilities', 'vehicles'];
 
     public function getAllBudgets()
@@ -111,25 +119,22 @@ class BudgetController extends Controller
             }
 
             $expenses = $this->request->input('expenses');
+            $id = $this->request->input('id', null);
 
-            if (!empty($this->request->input('id'))) {
-                $budget = Budgets::find($this->request->input('id'));
+            $budget = Budgets::firstOrCreate(
+                ['id' => $id],
+                [
+                    'name' => $this->request->input('name'),
+                    'budget_cycle' => $this->request->input('cycle'),
+                    'user_id' => $this->request->auth->id,
+                ]
+            );
 
-                if (empty($budget)) {
-                    $budget = new Budgets();
-                    $budget->created_at = Carbon::now()->format('Y-m-d H:i:s');
-                    $expenses['jobs'] = $this->generatePaidExpenses($expenses['jobs']);
-                }
-            } else {
-                $budget = new Budgets();
-                $budget->created_at = Carbon::now()->format('Y-m-d H:i:s');
-                $expenses['jobs'] = $this->generatePaidExpenses($expenses['jobs']);
+            if (empty($id)) {
+                $expenses['incomes'] = $this->generatePaidExpenses($expenses['incomes']);
             }
 
             DB::beginTransaction();
-            $budget->user_id = $this->request->auth->id;
-            $budget->name = $this->request->input('name');
-            $budget->budget_cycle = $this->request->input('cycle');
             $budget->updated_at = Carbon::now()->format('Y-m-d H:i:s');
             $budget->save();
 
@@ -290,7 +295,7 @@ class BudgetController extends Controller
      *      @value Datetime ['initial_pay_date']
      * }
      */
-    private function save_jobs($id, $expenses)
+    private function save_incomes($id, $expenses)
     {
         $attributes = $this->getJobsAttributes();
         return $this->insertOrUpdate($attributes, $expenses, $id, 'jobs');
@@ -504,14 +509,14 @@ class BudgetController extends Controller
         $results = [];
 
         foreach ($expenses as $job) {
-            $type = IncomeType::find($job['income_type_id'])->toArray();
+            $type = IncomeType::find($job['income_type_id']);
             $startPay = Carbon::createFromTimeString($job['initial_pay_date']);
-
-
-            $method = 'get_' . $type['slug'];
+            $method = 'get_' . $this->convertSlugToSnakeCase($type->slug);
 
             if (method_exists($this, $method)) {
                 $results = array_merge($results, $this->{$method}($job, $startPay, $currentMonth));
+            } else {
+                $results = array_merge($results, $job);
             }
         }
 
@@ -711,27 +716,5 @@ class BudgetController extends Controller
             'income_type_id' => $job['income_type_id'],
             'initial_pay_date' => $date->toDateTimeString(),
         ];
-    }
-
-    /**
-     * Get one time payment billing cycle; called dynamically from generatePaidExpenses()
-     *
-     * @param array $job {
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['income_type_id']
-     *      @value Datetime ['initial_pay_date']
-     * }
-     * @param Carbon $startPay
-     * @param Carbon $currentMonth
-     * @return array {
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['income_type_id']
-     *      @value Datetime ['initial_pay_date']
-     * }
-     */
-    private function get_one_time($job, $startPay, $currentMonth) {
-        return $job;
     }
 }
