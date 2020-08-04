@@ -34,7 +34,7 @@ class Budgets extends Model
      */
     public function banks()
     {
-        return $this->hasMany(Banks::class, 'budget_id', 'id');
+        return $this->hasMany(Bank::class, 'budget_id', 'id');
     }
 
     /**

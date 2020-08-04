@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Banks;
+use App\Models\Bank;
 use App\Models\BillTypes;
 use App\Models\BudgetAggregation;
 use App\Models\Budgets;
@@ -175,7 +175,7 @@ class BudgetController extends Controller
 
     public function deleteBudget($id) {
         try {
-            Banks::where($this->tableId, $id)->delete();
+            Bank::where($this->tableId, $id)->delete();
             CreditCards::where($this->tableId, $id)->delete();
             Investments::where($this->tableId, $id)->delete();
             Income::where($this->tableId, $id)->delete();
