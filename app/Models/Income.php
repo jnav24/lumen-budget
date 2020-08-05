@@ -8,6 +8,18 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Income extends Model
 {
     /**
+     * Default Attributes
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'name' => null,
+        'amount' => null,
+        'income_type_id' => null,
+        'initial_pay_date' => null,
+    ];
+
+    /**
      * Hide columns
      *
      * @var array

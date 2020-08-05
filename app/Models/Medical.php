@@ -8,6 +8,21 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Medical extends Model
 {
     /**
+     * Default Attributes
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'name' => null,
+        'amount' => null,
+        'due_date' => null,
+        'medical_type_id' => null,
+        'paid_date' => null,
+        'confirmation' => null,
+        'not_track_amount' => null,
+    ];
+
+    /**
      * Hide columns
      *
      * @var array

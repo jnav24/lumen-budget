@@ -5,8 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Vehicles extends Model
+class Vehicle extends Model
 {
+    /**
+     * Default Attributes
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'mileage' => null,
+        'amount' => null,
+        'due_date' => null,
+        'user_vehicle_id' => null,
+        'vehicle_type_id' => null,
+        'paid_date' => null,
+        'confirmation' => null,
+        'not_track_amount' => null,
+        'balance' => null,
+    ];
+
     /**
      * Hide columns
      *

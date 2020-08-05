@@ -5,8 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Investments extends Model
+class Investment extends Model
 {
+    /**
+     * Default Attributes
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'name' => null,
+        'amount' => null,
+        'investment_type_id' => null,
+    ];
+
     /**
      * Hide columns
      *

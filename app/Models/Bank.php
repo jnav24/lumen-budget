@@ -8,6 +8,18 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Bank extends Model
 {
     /**
+     * Default Attributes
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'name' => null,
+        'amount' => null,
+        'bank_type_id' => null,
+        'bank_template_id' => null,
+    ];
+
+    /**
      * Hide columns
      *
      * @var array

@@ -5,8 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Utilities extends Model
+class Utility extends Model
 {
+    /**
+     * Default Attributes
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'name' => null,
+        'amount' => null,
+        'due_date' => null,
+        'utility_type_id' => null,
+        'paid_date' => null,
+        'confirmation' => null,
+    ];
+
     /**
      * Hide columns
      *
