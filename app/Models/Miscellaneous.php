@@ -18,6 +18,7 @@ class Miscellaneous extends Model
         'paid_date' => null,
         'confirmation' => null,
         'not_track_amount' => null,
+        'budget_id' => null,
     ];
 
     /**

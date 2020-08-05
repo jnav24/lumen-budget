@@ -17,6 +17,7 @@ class Income extends Model
         'amount' => null,
         'income_type_id' => null,
         'initial_pay_date' => null,
+        'budget_id' => null,
     ];
 
     /**

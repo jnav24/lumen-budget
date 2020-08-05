@@ -25,6 +25,7 @@ class CreditCard extends Model
         'paid_date' => null,
         'confirmation' => null,
         'balance' => null,
+        'budget_id' => null,
     ];
 
     /**

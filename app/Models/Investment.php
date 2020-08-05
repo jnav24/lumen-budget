@@ -16,6 +16,7 @@ class Investment extends Model
         'name' => null,
         'amount' => null,
         'investment_type_id' => null,
+        'budget_id' => null,
     ];
 
     /**

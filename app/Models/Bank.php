@@ -16,7 +16,7 @@ class Bank extends Model
         'name' => null,
         'amount' => null,
         'bank_type_id' => null,
-        'bank_template_id' => null,
+        'budget_id' => null,
     ];
 
     /**

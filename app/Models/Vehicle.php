@@ -22,6 +22,7 @@ class Vehicle extends Model
         'confirmation' => null,
         'not_track_amount' => null,
         'balance' => null,
+        'budget_id' => null,
     ];
 
     /**

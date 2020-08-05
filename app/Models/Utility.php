@@ -19,6 +19,7 @@ class Utility extends Model
         'utility_type_id' => null,
         'paid_date' => null,
         'confirmation' => null,
+        'budget_id' => null,
     ];
 
     /**
