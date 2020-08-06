@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Budgets;
-use App\Models\CreditCards;
+use App\Models\CreditCard;
 use App\Models\Medical;
 use App\Models\Miscellaneous;
-use App\Models\Utilities;
-use App\Models\Vehicles;
+use App\Models\Utility;
+use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -74,13 +74,13 @@ class BudgetAggregationController extends Controller
 
             if (!empty($budget)) {
                 $budget = $budget[0];
-                $creditCards = CreditCards::where(function ($query) {
+                $creditCards = CreditCard::where(function ($query) {
                         $query->whereNull('confirmation')
                             ->orWhere('confirmation', '');
                     })
                     ->where('budget_id', $budget['id'])
                     ->count();
-                $utilities = Utilities::where(function ($query) {
+                $utilities = Utility::where(function ($query) {
                         $query->whereNull('confirmation')
                             ->orWhere('confirmation', '');
                     })
@@ -98,7 +98,7 @@ class BudgetAggregationController extends Controller
                     })
                     ->where('budget_id', $budget['id'])
                     ->count();
-                $vehicles = Vehicles::with(['type' => function ($relation) {
+                $vehicles = Vehicle::with(['type' => function ($relation) {
                         $relation->whereIn('slug', ['finance', 'lease']);
                     }])
                     ->where(function ($query) {
