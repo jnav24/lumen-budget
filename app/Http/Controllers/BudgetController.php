@@ -6,14 +6,14 @@ use App\Models\Bank;
 use App\Models\BillTypes;
 use App\Models\BudgetAggregation;
 use App\Models\Budgets;
-use App\Models\CreditCards;
-use App\Models\Investments;
+use App\Models\CreditCard;
+use App\Models\Investment;
 use App\Models\Income;
 use App\Models\IncomeType;
 use App\Models\Medical;
 use App\Models\Miscellaneous;
-use App\Models\Utilities;
-use App\Models\Vehicles;
+use App\Models\Utility;
+use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,12 +21,18 @@ use Illuminate\Validation\ValidationException;
 
 class BudgetController extends Controller
 {
+    /**
+     * @deprecated
+     * @var string
+     */
     protected $tableId = 'budget_id';
+
     /**
      * @deprecated get from BillTypes
      * @var array
      */
     private $earned = ['jobs'];
+
     /**
      * @deprecated get from BillTypes
      * @var array
@@ -79,12 +85,14 @@ class BudgetController extends Controller
                 }]);
 
             foreach ($slugs as $slug) {
-                $sql->with($slug);
+                $sql->with($this->convertSlugToSnakeCase($slug));
             }
 
             $data = $sql->first();
 
             foreach ($slugs as $slug) {
+                $slug = $this->convertSlugToSnakeCase($slug);
+
                 if ($data->{$slug}->isNotEmpty()) {
                     $expenses[$slug] = $data->{$slug}->toArray();
                 }
@@ -137,16 +145,45 @@ class BudgetController extends Controller
             DB::beginTransaction();
             $budget->updated_at = Carbon::now()->format('Y-m-d H:i:s');
             $budget->save();
+            $types = BillTypes::all();
+            $slugs = $types->pluck('slug');
 
             $returnExpenses = [];
 
+            // @todo all expense models will need $fillable
             foreach ($expenses as $key => $expenseList) {
-                $method = 'save_' . $key;
+                $index = $slugs->search($key);
+                $model = 'App\\Models\\' . $types[$index]->model;
 
-                if (method_exists($this, $method)) {
-                    $returnExpenses[$key] = $this->{$method}($budget->id, $expenseList);
+                if (class_exists($model)) {
+                    $class = new $model();
+
+                    $returnExpenses[$key] = array_map(
+                        function ($expense) use ($model, $class, $budget) {
+                            $expenseId = $this->isNotTempId($expense['id']) ? $expense['id'] : null;
+
+                            return $model::updateOrCreate(
+                                ['id' => $expenseId],
+                                array_merge(
+                                    array_intersect_key($expense, $class->getAttributes()),
+                                    ['budget_id' => $budget->id]
+                                )
+                            );
+                        },
+                        $expenseList
+                    );
                 }
             }
+
+            // @todo want to possibly replace the insertOrUpdate() with updateOrCreate()
+            // i.e Bank::updateOrCreate(<find_by>, <save_data>)
+//            foreach ($expenses as $key => $expenseList) {
+//                $method = 'save_' . $key;
+//
+//                if (method_exists($this, $method)) {
+//                    $returnExpenses[$key] = $this->{$method}($budget->id, $expenseList);
+//                }
+//            }
 
             $this->setupAndSaveAggregation($budget->id, $expenses);
             $saved = $budget->aggregations->filter(function ($value, $key) {
@@ -174,15 +211,16 @@ class BudgetController extends Controller
     }
 
     public function deleteBudget($id) {
+        // @todo update this based on BillTypes::all()
         try {
             Bank::where($this->tableId, $id)->delete();
-            CreditCards::where($this->tableId, $id)->delete();
-            Investments::where($this->tableId, $id)->delete();
+            CreditCard::where($this->tableId, $id)->delete();
+            Investment::where($this->tableId, $id)->delete();
             Income::where($this->tableId, $id)->delete();
             Medical::where($this->tableId, $id)->delete();
             Miscellaneous::where($this->tableId, $id)->delete();
-            Utilities::where($this->tableId, $id)->delete();
-            Vehicles::where($this->tableId, $id)->delete();
+            Utility::where($this->tableId, $id)->delete();
+            Vehicle::where($this->tableId, $id)->delete();
             Budgets::find($id)->delete();
             return $this->respondWithOK([]);
         } catch (\Exception $e) {
@@ -194,6 +232,7 @@ class BudgetController extends Controller
     /**
      * Saves banks info; called dynamically from saveBudget()
      *
+     * @deprecated
      * @param integer $id Budget Id; Foreign Key
      * @param array $expenses {
      *      @value integer ['id'] (optional)
@@ -217,6 +256,7 @@ class BudgetController extends Controller
     /**
      * Saves credit card info; called dynamically from saveBudget()
      *
+     * @deprecated
      * @param integer $id Budget Id; Foreign Key
      * @param array $expenses {
      *      @value integer ['id'] (optional)
@@ -256,6 +296,7 @@ class BudgetController extends Controller
     /**
      * Saves investments info; called dynamically from saveBudget()
      *
+     * @deprecated
      * @param integer $id Budget Id; Foreign Key
      * @param array $expenses {
      *      @value integer ['id'] (optional)
@@ -279,6 +320,7 @@ class BudgetController extends Controller
     /**
      * Saves jobs info; called dynamically from saveBudget()
      *
+     * @deprecated
      * @param integer $id Budget Id; Foreign Key
      * @param array $expenses {
      *      @value integer ['id'] (optional)
@@ -304,6 +346,7 @@ class BudgetController extends Controller
     /**
      * Saves medical info; called dynamically from saveBudget()
      *
+     * @deprecated
      * @param integer $id Budget Id; Foreign Key
      * @param array $expenses {
      *      @value integer ['id'] (optional)
@@ -333,6 +376,7 @@ class BudgetController extends Controller
     /**
      * Saves miscellaneous info; called dynamically from saveBudget()
      *
+     * @deprecated
      * @param integer $id Budget Id; Foreign Key
      * @param array $expenses {
      *      @value integer ['id'] (optional)
@@ -360,6 +404,7 @@ class BudgetController extends Controller
     /**
      * Saves utilities info; called dynamically from saveBudget()
      *
+     * @deprecated
      * @param integer $id Budget Id; Foreign Key
      * @param array $expenses {
      *      @value integer ['id'] (optional)
@@ -389,6 +434,7 @@ class BudgetController extends Controller
     /**
      * Saves vehicles; called dynamically from saveBudget()
      *
+     * @deprecated
      * @param integer $id budget id; foreign key
      * @param array $expenses {
      *      @value integer ['id'] (optional)
