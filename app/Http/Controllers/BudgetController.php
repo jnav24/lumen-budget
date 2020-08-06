@@ -21,24 +21,6 @@ use Illuminate\Validation\ValidationException;
 
 class BudgetController extends Controller
 {
-    /**
-     * @deprecated
-     * @var string
-     */
-    protected $tableId = 'budget_id';
-
-    /**
-     * @deprecated get from BillTypes
-     * @var array
-     */
-    private $earned = ['jobs'];
-
-    /**
-     * @deprecated get from BillTypes
-     * @var array
-     */
-    private $spent = ['credit_cards', 'medical', 'miscellaneous', 'utilities', 'vehicles'];
-
     public function getAllBudgets()
     {
         try {
@@ -174,7 +156,16 @@ class BudgetController extends Controller
                 }
             }
 
-            $this->setupAndSaveAggregation($budget->id, $expenses);
+            $this->setupAndSaveAggregation(
+                $budget->id,
+                $expenses,
+                $types->filter(function ($type) {
+                    return $type->save_type;
+                })->pluck('slug')->toArray(),
+                $types->filter(function ($type) {
+                    return !$type->save_type;
+                })->pluck('slug')->toArray()
+            );
             $saved = $budget->aggregations->filter(function ($value, $key) {
                 return $value->type === 'saved';
             });
@@ -230,11 +221,13 @@ class BudgetController extends Controller
      * @param array $allExpenses {
      *      @value array BillType
      * }
+     * @param string[] $earned
+     * @param string[] $spent
      */
-    private function setupAndSaveAggregation($budgetId, $allExpenses)
+    private function setupAndSaveAggregation($budgetId, $allExpenses, $earned, $spent)
     {
-        $earnedTotal = $this->getAggregationTotal($this->earned, $allExpenses);
-        $spentTotal = $this->getAggregationTotal($this->spent, $allExpenses);
+        $earnedTotal = $this->getAggregationTotal($earned, $allExpenses);
+        $spentTotal = $this->getAggregationTotal($spent, $allExpenses);
         $savedTotal = number_format((float)($earnedTotal - $spentTotal), 2, '.', '');
 
         $this->saveAggregation($budgetId, 'earned', $earnedTotal);
