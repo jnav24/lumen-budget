@@ -24,6 +24,22 @@ class Loan extends Model
     ];
 
     /**
+     * Mass assignment
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name' => null,
+        'amount' => null,
+        'due_date' => null,
+        'paid_date' => null,
+        'confirmation' => null,
+        'not_track_amount' => null,
+        'loan_type_id' => null,
+        'budget_id' => null,
+    ];
+
+    /**
      * Hide columns
      *
      * @var array

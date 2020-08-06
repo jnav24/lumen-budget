@@ -7,6 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Budgets extends Model
 {
     /**
+     * @var array
+     */
+    protected $fillable = [
+        'id',
+        'name',
+        'budget_cycle',
+        'user_id',
+    ];
+
+    /**
      * Hide columns
      *
      * @var array
@@ -54,7 +64,7 @@ class Budgets extends Model
      */
     public function credit_cards()
     {
-        return $this->hasMany(CreditCards::class, 'budget_id', 'id');
+        return $this->hasMany(CreditCard::class, 'budget_id', 'id');
     }
 
     /**
@@ -114,7 +124,7 @@ class Budgets extends Model
      */
     public function investments()
     {
-        return $this->hasMany(Investments::class, 'budget_id', 'id');
+        return $this->hasMany(Investment::class, 'budget_id', 'id');
     }
 
     /**
@@ -214,7 +224,7 @@ class Budgets extends Model
      */
     public function utilities()
     {
-        return $this->hasMany(Utilities::class, 'budget_id', 'id');
+        return $this->hasMany(Utility::class, 'budget_id', 'id');
     }
 
     /**
@@ -224,6 +234,6 @@ class Budgets extends Model
      */
     public function vehicles()
     {
-        return $this->hasMany(Vehicles::class, 'budget_id', 'id');
+        return $this->hasMany(Vehicle::class, 'budget_id', 'id');
     }
 }

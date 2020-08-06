@@ -22,6 +22,21 @@ class Miscellaneous extends Model
     ];
 
     /**
+     * Mass assignment
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'amount',
+        'due_date',
+        'paid_date',
+        'confirmation',
+        'not_track_amount',
+        'budget_id',
+    ];
+
+    /**
      * Hide columns
      *
      * @var array

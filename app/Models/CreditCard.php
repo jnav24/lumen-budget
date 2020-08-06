@@ -29,6 +29,27 @@ class CreditCard extends Model
     ];
 
     /**
+     * Mass assignment
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'limit',
+        'last_4',
+        'exp_month',
+        'exp_year',
+        'apr',
+        'due_date',
+        'credit_card_type_id',
+        'amount',
+        'paid_date',
+        'confirmation',
+        'balance',
+        'budget_id',
+    ];
+
+    /**
      * Hide columns
      *
      * @var array

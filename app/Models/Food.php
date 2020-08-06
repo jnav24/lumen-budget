@@ -24,6 +24,22 @@ class Food extends Model
     ];
 
     /**
+     * Mass Assignment
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'amount',
+        'due_date',
+        'paid_date',
+        'confirmation',
+        'not_track_amount',
+        'food_type_id',
+        'budget_id',
+    ];
+
+    /**
      * Hide columns
      *
      * @var array

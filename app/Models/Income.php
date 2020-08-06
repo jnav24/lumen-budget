@@ -21,6 +21,19 @@ class Income extends Model
     ];
 
     /**
+     * Mass assignment
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'amount',
+        'income_type_id',
+        'initial_pay_date',
+        'budget_id',
+    ];
+
+    /**
      * Hide columns
      *
      * @var array

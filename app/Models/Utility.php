@@ -23,6 +23,21 @@ class Utility extends Model
     ];
 
     /**
+     * Mass assignment
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'amount',
+        'due_date',
+        'utility_type_id',
+        'paid_date',
+        'confirmation',
+        'budget_id',
+    ];
+
+    /**
      * Hide columns
      *
      * @var array

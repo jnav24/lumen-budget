@@ -20,6 +20,18 @@ class Investment extends Model
     ];
 
     /**
+     * Mass assignment
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'amount',
+        'investment_type_id',
+        'budget_id',
+    ];
+
+    /**
      * Hide columns
      *
      * @var array

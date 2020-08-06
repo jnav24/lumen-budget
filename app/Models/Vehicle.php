@@ -26,6 +26,24 @@ class Vehicle extends Model
     ];
 
     /**
+     * Mass assignment
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'mileage',
+        'amount',
+        'due_date',
+        'user_vehicle_id',
+        'vehicle_type_id',
+        'paid_date',
+        'confirmation',
+        'not_track_amount',
+        'balance',
+        'budget_id',
+    ];
+
+    /**
      * Hide columns
      *
      * @var array

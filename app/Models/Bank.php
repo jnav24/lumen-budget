@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+// @todo there is a bank_template_id column in the db. do I need it?
 class Bank extends Model
 {
     /**
@@ -17,6 +18,18 @@ class Bank extends Model
         'amount' => null,
         'bank_type_id' => null,
         'budget_id' => null,
+    ];
+
+    /**
+     * Mass assignment
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'amount',
+        'bank_type_id',
+        'budget_id',
     ];
 
     /**

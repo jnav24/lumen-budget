@@ -24,6 +24,22 @@ class Childcare extends Model
     ];
 
     /**
+     * Mass assignment
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'amount',
+        'due_date',
+        'paid_date',
+        'confirmation',
+        'not_track_amount',
+        'childcare_type_id',
+        'budget_id',
+    ];
+
+    /**
      * Hide columns
      *
      * @var array
