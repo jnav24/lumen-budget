@@ -223,6 +223,14 @@ class BudgetController extends Controller
         }
     }
 
+    /**
+     * Setup and Save Aggregations
+     *
+     * @param integer | string $budgetId
+     * @param array $allExpenses {
+     *      @value array BillType
+     * }
+     */
     private function setupAndSaveAggregation($budgetId, $allExpenses)
     {
         $earnedTotal = $this->getAggregationTotal($this->earned, $allExpenses);
@@ -234,6 +242,15 @@ class BudgetController extends Controller
         $this->saveAggregation($budgetId, 'spent', $spentTotal);
     }
 
+    /**
+     * Get totals for aggregations
+     *
+     * @param string[] $attributes
+     * @param array $allExpenses {
+     *      @value array BillType
+     * }
+     * @return string
+     */
     private function getAggregationTotal($attributes, $allExpenses)
     {
         $total = 0;
@@ -273,24 +290,18 @@ class BudgetController extends Controller
         return $result;
     }
 
-    private function saveAggregation($budgetId, $type, $total)
+    private function saveAggregation($budgetId, $type, $total): void
     {
-        $budget = BudgetAggregation::where('budget_id', $budgetId)
-            ->where('type', $type)
-            ->where('user_id', $this->request->auth->id)
-            ->first();
-
-        if (empty($budget)) {
-            $budget = new BudgetAggregation();
-            $budget->type = $type;
-            $budget->budget_id = $budgetId;
-            $budget->user_id = $this->request->auth->id;
-            $budget->created_at = Carbon::now()->format('Y-m-d H:i:s');
-        }
-
-        $budget->value = $total;
-        $budget->updated_at = Carbon::now()->format('Y-m-d H:i:s');
-        $budget->save();
+        BudgetAggregation::firstOrCreate(
+            [
+                'budget_id' => $budgetId,
+                'type' => $type,
+                'user_id' => $this->request->auth->id
+            ],
+            [
+                'value' => $total,
+            ]
+        );
     }
 
     /**
