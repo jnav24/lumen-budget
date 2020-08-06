@@ -67,6 +67,7 @@ class Controller extends BaseController
     /**
      * Insert or update a table in the DB
      *
+     * @deprecated
      * @param array $attributes ; array of column names
      * @param array $data ; multidimensional array of records to be saved
      * @param int $id ; foreign key id
@@ -109,45 +110,5 @@ class Controller extends BaseController
     protected function convertSlugToSnakeCase(string $string): string
     {
         return str_replace('-', '_', $string);
-    }
-
-    protected function getBanksAttributes()
-    {
-        return ['id', 'name', 'amount', 'bank_type_id', 'bank_template_id'];
-    }
-
-    protected function getCreditCardsAttributes()
-    {
-        return ['id', 'name', 'limit', 'last_4', 'exp_month', 'exp_year', 'apr', 'due_date', 'credit_card_type_id', 'amount', 'paid_date', 'confirmation', 'balance'];
-    }
-
-    protected function getInvestmentAttributes()
-    {
-        return ['id', 'name', 'amount', 'investment_type_id'];
-    }
-
-    protected function getJobsAttributes()
-    {
-        return ['id', 'name', 'amount', 'income_type_id', 'initial_pay_date'];
-    }
-
-    protected function getMedicalAttributes()
-    {
-        return ['id', 'name', 'amount', 'due_date', 'medical_type_id', 'paid_date', 'confirmation', 'not_track_amount'];
-    }
-
-    protected function getMiscellaneousAttributes()
-    {
-        return ['id', 'name', 'amount', 'due_date', 'paid_date', 'confirmation', 'not_track_amount'];
-    }
-
-    protected function getUtilitiesAttributes()
-    {
-        return ['id', 'name', 'amount', 'due_date', 'utility_type_id', 'paid_date', 'confirmation'];
-    }
-
-    protected function getVehiclesAttributes()
-    {
-        return ['id', 'mileage', 'amount', 'due_date', 'user_vehicle_id', 'vehicle_type_id', 'paid_date', 'confirmation', 'not_track_amount', 'balance'];
     }
 }

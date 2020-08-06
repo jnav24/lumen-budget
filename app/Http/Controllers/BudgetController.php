@@ -150,7 +150,6 @@ class BudgetController extends Controller
 
             $returnExpenses = [];
 
-            // @todo all expense models will need $fillable
             foreach ($expenses as $key => $expenseList) {
                 $index = $slugs->search($key);
                 $model = 'App\\Models\\' . $types[$index]->model;
@@ -174,16 +173,6 @@ class BudgetController extends Controller
                     );
                 }
             }
-
-            // @todo want to possibly replace the insertOrUpdate() with updateOrCreate()
-            // i.e Bank::updateOrCreate(<find_by>, <save_data>)
-//            foreach ($expenses as $key => $expenseList) {
-//                $method = 'save_' . $key;
-//
-//                if (method_exists($this, $method)) {
-//                    $returnExpenses[$key] = $this->{$method}($budget->id, $expenseList);
-//                }
-//            }
 
             $this->setupAndSaveAggregation($budget->id, $expenses);
             $saved = $budget->aggregations->filter(function ($value, $key) {
