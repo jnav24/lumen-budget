@@ -200,19 +200,24 @@ class BudgetController extends Controller
     }
 
     public function deleteBudget($id) {
-        // @todo update this based on BillTypes::all()
         try {
-            Bank::where($this->tableId, $id)->delete();
-            CreditCard::where($this->tableId, $id)->delete();
-            Investment::where($this->tableId, $id)->delete();
-            Income::where($this->tableId, $id)->delete();
-            Medical::where($this->tableId, $id)->delete();
-            Miscellaneous::where($this->tableId, $id)->delete();
-            Utility::where($this->tableId, $id)->delete();
-            Vehicle::where($this->tableId, $id)->delete();
+            $types = BillTypes::all();
+
+            DB::beginTransaction();
+
+            foreach ($types as $type) {
+                $model = 'App\\Model\\' . $type->model;
+
+                if (class_exists($model)) {
+                    $model::where('budget_id', $id)->delete();
+                }
+            }
+
             Budgets::find($id)->delete();
+            DB::commit();
             return $this->respondWithOK([]);
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('BudgetController::deleteBudget - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Unable to delete budget at this time');
         }
