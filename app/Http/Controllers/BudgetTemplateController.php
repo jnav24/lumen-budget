@@ -2,16 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BankTemplates;
+use App\Models\BillTypes;
 use App\Models\BudgetTemplates;
-use App\Models\CreditCardTemplates;
-use App\Models\InvestmentTemplates;
-use App\Models\IncomeTemplate;
-use App\Models\MedicalTemplates;
-use App\Models\MiscellaneousTemplates;
-use App\Models\UtilityTemplates;
-use App\Models\VehicleTemplates;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class BudgetTemplateController extends Controller
@@ -22,14 +16,15 @@ class BudgetTemplateController extends Controller
     {
         try {
             $this->validate($this->request, [
-                'id' => 'required',
-                'type' => 'required',
+                'id' => 'required|numeric',
+                'type' => 'required|min:3',
             ]);
 
-            $method = 'delete_' . $this->request->input('type') . '_templates';
+            $type = BillTypes::where('slug', $this->request->input('type'))->firstOrFail();
+            $model = 'App\\Models\\' . $type->model;
 
-            if (method_exists($this, $method)) {
-                $this->{$method}($this->request->input('id'));
+            if (class_exists($model)) {
+                $model::find($this->request->input('id'))->delete();
                 return $this->respondWithOK([]);
             }
 
@@ -37,6 +32,7 @@ class BudgetTemplateController extends Controller
         } catch (ValidationException $ex) {
             return $this->respondWithBadRequest($ex->errors(), 'Errors validating request.');
         } catch (\Exception $e) {
+            Log::error('BudgetTemplateController::deleteBudgetTemplate - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Unable to delete budget template at this time.');
         }
     }
@@ -118,110 +114,6 @@ class BudgetTemplateController extends Controller
         } catch (\Exception $e) {
             Log::error('BudgetTemplateController::saveBudgetTemplates - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Unable to save budget template at this time.');
-        }
-    }
-
-    /**
-     * Dynamic method called from deleteBudgetTemplate()
-     *
-     * @param int $id
-     * @throws \Exception
-     */
-    private function delete_banks_templates(int $id)
-    {
-        if (empty(BankTemplates::find($id)->delete())) {
-            throw new \Exception();
-        }
-    }
-
-    /**
-     * Dynamic method called from deleteBudgetTemplate()
-     *
-     * @param int $id
-     * @throws \Exception
-     */
-    private function delete_credit_cards_templates(int $id)
-    {
-        if (empty(CreditCardTemplates::find($id)->delete())) {
-            throw new \Exception();
-        }
-    }
-
-    /**
-     * Dynamic method called from deleteBudgetTemplate()
-     *
-     * @param int $id
-     * @throws \Exception
-     */
-    private function delete_investments_templates(int $id)
-    {
-        if (empty(InvestmentTemplates::find($id)->delete())) {
-            throw new \Exception();
-        }
-    }
-
-    /**
-     * Dynamic method called from deleteBudgetTemplate()
-     *
-     * @param int $id
-     * @throws \Exception
-     */
-    private function delete_jobs_templates(int $id)
-    {
-        if (empty(IncomeTemplate::find($id)->delete())) {
-            throw new \Exception();
-        }
-    }
-
-    /**
-     * Dynamic method called from deleteBudgetTemplate()
-     *
-     * @param int $id
-     * @throws \Exception
-     */
-    private function delete_medical_templates(int $id)
-    {
-        if (empty(MedicalTemplates::find($id)->delete())) {
-            throw new \Exception();
-        }
-    }
-
-    /**
-     * Dynamic method called from deleteBudgetTemplate()
-     *
-     * @param int $id
-     * @throws \Exception
-     */
-    private function delete_miscellaneous_templates(int $id)
-    {
-        if (empty(MiscellaneousTemplates::find($id)->delete())) {
-            throw new \Exception();
-        }
-    }
-
-    /**
-     * Dynamic method called from deleteBudgetTemplate()
-     *
-     * @param int $id
-     * @throws \Exception
-     */
-    private function delete_utilities_templates(int $id)
-    {
-        if (empty(UtilityTemplates::find($id)->delete())) {
-            throw new \Exception();
-        }
-    }
-
-    /**
-     * Dynamic method called from deleteBudgetTemplate()
-     *
-     * @param int $id
-     * @throws \Exception
-     */
-    private function delete_vehicles_templates(int $id)
-    {
-        if (empty(VehicleTemplates::find($id)->delete())) {
-            throw new \Exception();
         }
     }
 
