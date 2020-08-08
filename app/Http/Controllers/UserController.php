@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserProfile;
+use App\Models\UserVehicle;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -19,7 +20,10 @@ class UserController extends Controller
             ]);
 
             $profileAttributes = ['first_name', 'last_name'];
-            $profileRequest = array_intersect_key($this->request->input('profile'), array_flip($profileAttributes));
+            $profileRequest = array_intersect_key(
+                $this->request->input('profile'),
+                array_flip($profileAttributes)
+            );
 
             if (empty($profileRequest) || count($profileAttributes) !== count($profileRequest)) {
                 return $this->respondWithBadRequest([], '');
@@ -30,11 +34,23 @@ class UserController extends Controller
             $profile->last_name = $profileRequest['last_name'];
             $profile->save();
 
-            $vehicleAttributes = ['id', 'make', 'model', 'year', 'color', 'license', 'active'];
-            $vehicles = $this->insertOrUpdate($vehicleAttributes, $this->request->input('vehicles'), $this->request->auth->id, 'user_vehicles');
+            $attributes = (new UserVehicle())->getAttributes();
+
+            $vehicles = array_map(function ($vehicle) use ($attributes) {
+                return UserVehicle::updateOrCreate(
+                    ['id' => $this->isNotTempId($vehicle['id']) ? $vehicle['id'] : null],
+                    array_intersect_key(
+                        $vehicle,
+                        $attributes
+                    )
+                );
+            }, $this->request->input('vehicles'));
 
             return $this->respondWithOK([
-                'profile' => array_merge($profile->toArray(), ['email' => $this->request->auth->username]),
+                'profile' => array_merge(
+                    $profile->toArray(),
+                    ['email' => $this->request->auth->username]
+                ),
                 'vehicles' => $vehicles,
             ]);
         } catch(ValidationException $e) {

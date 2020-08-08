@@ -7,6 +7,28 @@ use Illuminate\Database\Eloquent\Model;
 class UserVehicle extends Model
 {
     /**
+     * Default Attributes
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'make' => null,
+        'model' => null,
+        'year' => null,
+        'color' => null,
+        'license' => null,
+        'active' => null,
+        'user_id' => null,
+    ];
+
+    /**
+     * Mass assignment
+     *
+     * @var array
+     */
+    protected $fillable = ['make', 'model', 'year', 'color', 'license', 'active', 'user_id'];
+
+    /**
      * Table name
      *
      * @var string
@@ -32,13 +54,6 @@ class UserVehicle extends Model
         'created_at',
         'updated_at',
     ];
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [];
 
     /**
      * Get User
