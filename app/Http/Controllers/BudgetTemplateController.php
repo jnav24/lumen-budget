@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BillTypes;
-use App\Models\BudgetTemplates;
+use App\Models\BudgetTemplate;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -40,7 +40,7 @@ class BudgetTemplateController extends Controller
     public function getAllBudgetTemplates()
     {
         try {
-            $data = BudgetTemplates::where('user_id', $this->request->auth->id)
+            $data = BudgetTemplate::where('user_id', $this->request->auth->id)
                 ->with('banks')
                 ->with('credit_cards')
                 ->with('investments')
@@ -85,25 +85,34 @@ class BudgetTemplateController extends Controller
                 return $this->respondWithBadRequest([], 'Missing expenses.');
             }
 
-            $template = BudgetTemplates::where('user_id', $this->request->auth->id)->first();
+            $template = BudgetTemplate::firstOrCreate(
+                [
+                    'user_id' => $this->request->auth->id,
+                ],
+                [
+                    'updated_at' => Carbon::now(),
+                ]
+            );
 
-            if (empty($template)) {
-                $template = new BudgetTemplates();
-                $template->created_at = Carbon::now();
-            }
-
-            $template->user_id = $this->request->auth->id;
-            $template->updated_at = Carbon::now();
-            $template->save();
+//            $template = BudgetTemplates::where('user_id', $this->request->auth->id)->first();
+//
+//            if (empty($template)) {
+//                $template = new BudgetTemplates();
+//                $template->created_at = Carbon::now();
+//            }
+//
+//            $template->user_id = $this->request->auth->id;
+//            $template->updated_at = Carbon::now();
+//            $template->save();
             $savedData = [];
-
-            foreach ($this->request->input('expenses') as $type => $expenses) {
-                $method = $type . '_templates';
-
-                if (method_exists($this, $method)) {
-                    $savedData[$type] = $this->{$method}($expenses, $template->id);
-                }
-            }
+//
+//            foreach ($this->request->input('expenses') as $type => $expenses) {
+//                $method = $type . '_templates';
+//
+//                if (method_exists($this, $method)) {
+//                    $savedData[$type] = $this->{$method}($expenses, $template->id);
+//                }
+//            }
 
             return $this->respondWithOK([
                 'templates' => [
