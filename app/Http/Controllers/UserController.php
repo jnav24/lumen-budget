@@ -16,7 +16,7 @@ class UserController extends Controller
         try {
             $this->validate($this->request, [
                 'profile' => 'required',
-                'vehicles' => 'required'
+                'vehicles' => 'required|array'
             ]);
 
             $profileAttributes = ['first_name', 'last_name'];
