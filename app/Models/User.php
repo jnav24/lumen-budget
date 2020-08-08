@@ -63,7 +63,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     public function vehicles()
     {
-        return $this->hasMany(UserVehicles::class, 'user_id', 'id');
+        return $this->hasMany(UserVehicle::class, 'user_id', 'id');
     }
 
     /**
