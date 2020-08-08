@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BankTemplates extends Model
+class CreditCardTemplate extends Model
 {
     /**
      * Default Attributes
@@ -13,8 +13,17 @@ class BankTemplates extends Model
      */
     protected $attributes = [
         'name' => null,
+        'limit' => null,
+        'last_4' => null,
+        'exp_month' => null,
+        'exp_year' => null,
+        'apr' => null,
+        'due_date' => null,
+        'credit_card_type_id' => null,
         'amount' => null,
-        'bank_type_id' => null,
+        'paid_date' => null,
+        'confirmation' => null,
+        'balance' => null,
         'budget_template_id' => null,
     ];
 
@@ -25,8 +34,17 @@ class BankTemplates extends Model
      */
     protected $fillable = [
         'name',
+        'limit',
+        'last_4',
+        'exp_month',
+        'exp_year',
+        'apr',
+        'due_date',
+        'credit_card_type_id',
         'amount',
-        'bank_type_id',
+        'paid_date',
+        'confirmation',
+        'balance',
         'budget_template_id',
     ];
 
@@ -46,5 +64,5 @@ class BankTemplates extends Model
      *
      * @var string
      */
-    protected $table = 'bank_templates';
+    protected $table = 'credit_card_templates';
 }

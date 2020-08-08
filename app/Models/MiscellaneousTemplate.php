@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class UtilityTemplates extends Model
+class MiscellaneousTemplate extends Model
 {
     /**
      * Default Attributes
@@ -15,9 +15,9 @@ class UtilityTemplates extends Model
         'name' => null,
         'amount' => null,
         'due_date' => null,
-        'utility_type_id' => null,
         'paid_date' => null,
         'confirmation' => null,
+        'not_track_amount' => null,
         'budget_template_id' => null,
     ];
 
@@ -30,9 +30,9 @@ class UtilityTemplates extends Model
         'name',
         'amount',
         'due_date',
-        'utility_type_id',
         'paid_date',
         'confirmation',
+        'not_track_amount',
         'budget_template_id',
     ];
 
@@ -52,5 +52,5 @@ class UtilityTemplates extends Model
      *
      * @var string
      */
-    protected $table = 'utility_templates';
+    protected $table = 'miscellaneous_templates';
 }

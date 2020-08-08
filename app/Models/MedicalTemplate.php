@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MedicalTemplates extends Model
+class MedicalTemplate extends Model
 {
     /**
      * Default Attributes

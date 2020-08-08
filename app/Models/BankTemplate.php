@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class VehicleTemplates extends Model
+class BankTemplate extends Model
 {
     /**
      * Default Attributes
@@ -12,15 +12,9 @@ class VehicleTemplates extends Model
      * @var array
      */
     protected $attributes = [
-        'mileage' => null,
+        'name' => null,
         'amount' => null,
-        'due_date' => null,
-        'user_vehicle_id' => null,
-        'vehicle_type_id' => null,
-        'paid_date' => null,
-        'confirmation' => null,
-        'not_track_amount' => null,
-        'balance' => null,
+        'bank_type_id' => null,
         'budget_template_id' => null,
     ];
 
@@ -30,15 +24,9 @@ class VehicleTemplates extends Model
      * @var array
      */
     protected $fillable = [
-        'mileage',
+        'name',
         'amount',
-        'due_date',
-        'user_vehicle_id',
-        'vehicle_type_id',
-        'paid_date',
-        'confirmation',
-        'not_track_amount',
-        'balance',
+        'bank_type_id',
         'budget_template_id',
     ];
 
@@ -58,5 +46,5 @@ class VehicleTemplates extends Model
      *
      * @var string
      */
-    protected $table = 'vehicle_templates';
+    protected $table = 'bank_templates';
 }
