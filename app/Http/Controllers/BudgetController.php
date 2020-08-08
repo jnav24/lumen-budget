@@ -124,37 +124,10 @@ class BudgetController extends Controller
                 $expenses['incomes'] = $this->generatePaidExpenses($expenses['incomes']);
             }
 
-            DB::beginTransaction();
             $budget->updated_at = Carbon::now()->format('Y-m-d H:i:s');
             $budget->save();
             $types = BillTypes::all();
-            $slugs = $types->pluck('slug');
-
-            $returnExpenses = [];
-
-            foreach ($expenses as $key => $expenseList) {
-                $index = $slugs->search($key);
-                $model = 'App\\Models\\' . $types[$index]->model;
-
-                if (class_exists($model)) {
-                    $class = new $model();
-
-                    $returnExpenses[$key] = array_map(
-                        function ($expense) use ($model, $class, $budget) {
-                            $expenseId = $this->isNotTempId($expense['id']) ? $expense['id'] : null;
-
-                            return $model::updateOrCreate(
-                                ['id' => $expenseId],
-                                array_merge(
-                                    array_intersect_key($expense, $class->getAttributes()),
-                                    ['budget_id' => $budget->id]
-                                )
-                            );
-                        },
-                        $expenseList
-                    );
-                }
-            }
+            $returnExpenses = $this->saveExpenses($budget->id, $expenses);
 
             $this->setupAndSaveAggregation(
                 $budget->id,
@@ -169,7 +142,6 @@ class BudgetController extends Controller
             $saved = $budget->aggregations->filter(function ($value, $key) {
                 return $value->type === 'saved';
             });
-            DB::commit();
 
             return $this->respondWithOK([
                 'budget' => [
@@ -184,7 +156,6 @@ class BudgetController extends Controller
         } catch (ValidationException $e) {
             return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
         } catch (\Exception $e) {
-            DB::rollBack();
             Log::error('BudgetController::saveBudget - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Unable to save budget at this time.');
         }
