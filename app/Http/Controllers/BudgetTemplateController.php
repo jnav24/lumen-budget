@@ -10,8 +10,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class BudgetTemplateController extends Controller
 {
-    protected $tableId = 'budget_template_id';
-
     public function deleteBudgetTemplate()
     {
         try {
@@ -43,14 +41,12 @@ class BudgetTemplateController extends Controller
             $sql = BudgetTemplate::where('user_id', $this->request->auth->id);
             ['data' => $data, 'expenses' => $expenses] = $this->getAllRelationships($sql);
 
-            $budgets = [
+            return $this->respondWithOK([
                 'template' => [
                     'id' => $data->id,
                     'expenses' => $expenses,
                 ],
-            ];
-
-            return $this->respondWithOK($budgets);
+            ]);
         } catch (ModelNotFoundException $e) {
             return $this->respondWithBadRequest([], 'User does not have any budget templates');
         } catch (\Exception $e) {
