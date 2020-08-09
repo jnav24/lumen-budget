@@ -18,7 +18,10 @@ class VehicleType extends Model
      *
      * @var array
      */
-    protected $hidden = [];
+    protected $hidden= [
+        'created_at',
+        'updated_at',
+    ];
 
     /**
      * The attributes that are mass assignable.
