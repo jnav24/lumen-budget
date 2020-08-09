@@ -66,7 +66,7 @@ class Vehicle extends Model
      */
     public function type()
     {
-        return $this->hasOne(VehicleTypes::class, 'id', 'vehicle_type_id');
+        return $this->hasOne(VehicleType::class, 'id', 'vehicle_type_id');
     }
 
     /**

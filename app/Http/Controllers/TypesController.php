@@ -2,14 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BankTypes;
 use App\Models\BillTypes;
-use App\Models\CreditCardTypes;
-use App\Models\InvestmentTypes;
-use App\Models\IncomeType;
-use App\Models\MedicalTypes;
-use App\Models\UtilityTypes;
-use App\Models\VehicleTypes;
 
 class TypesController extends Controller
 {

@@ -72,6 +72,6 @@ class CreditCard extends Model
      */
     public function type()
     {
-        return $this->hasOne(CreditCardTypes::class, 'id', 'credit_card_type_id');
+        return $this->hasOne(CreditCardType::class, 'id', 'credit_card_type_id');
     }
 }

@@ -60,6 +60,6 @@ class Utility extends Model
      */
     public function type()
     {
-        return $this->hasOne(UtilityTypes::class, 'id', 'utility_type_id');
+        return $this->hasOne(UtilityType::class, 'id', 'utility_type_id');
     }
 }

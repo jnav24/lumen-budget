@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class VehicleTypes extends Model
+class VehicleType extends Model
 {
     /**
      * Table name

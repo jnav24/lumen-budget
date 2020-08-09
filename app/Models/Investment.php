@@ -54,6 +54,6 @@ class Investment extends Model
      */
     public function type()
     {
-        return $this->hasOne(InvestmentTypes::class, 'id', 'investment_type_id');
+        return $this->hasOne(InvestmentType::class, 'id', 'investment_type_id');
     }
 }

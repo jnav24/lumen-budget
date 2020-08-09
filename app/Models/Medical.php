@@ -62,6 +62,6 @@ class Medical extends Model
      */
     public function type()
     {
-        return $this->hasOne(MedicalTypes::class, 'id', 'medical_type_id');
+        return $this->hasOne(MedicalType::class, 'id', 'medical_type_id');
     }
 }
