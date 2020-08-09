@@ -186,10 +186,10 @@ class Controller extends BaseController
         $data = $sql->firstOrFail();
 
         foreach ($slugs as $slug) {
-            $slug = $this->convertSlugToSnakeCase($slug);
+            $snakeSlug = $this->convertSlugToSnakeCase($slug);
 
-            if ($data->{$slug}->isNotEmpty()) {
-                $expenses[$slug] = $data->{$slug}->toArray();
+            if ($data->{$snakeSlug}->isNotEmpty()) {
+                $expenses[$slug] = $data->{$snakeSlug}->toArray();
             }
         }
 
