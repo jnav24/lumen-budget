@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-// @todo there is a bank_template_id column in the db. do I need it?
 class Bank extends Model
 {
     /**
      * Default Attributes
-     *
+     * bank_template_id gets the latest bank amount from bank template and saves it to the bank on creation
+     * also, when the latest bank is saved, update the budget template
      * @var array
      */
     protected $attributes = [
@@ -18,6 +18,7 @@ class Bank extends Model
         'amount' => null,
         'bank_type_id' => null,
         'budget_id' => null,
+        'bank_template_id' => null,
     ];
 
     /**
@@ -30,6 +31,7 @@ class Bank extends Model
         'amount',
         'bank_type_id',
         'budget_id',
+        'bank_template_id',
     ];
 
     /**
@@ -55,6 +57,6 @@ class Bank extends Model
      */
     public function type()
     {
-        return $this->hasOne(BankTypes::class, 'id', 'bank_type_id');
+        return $this->hasOne(BankType::class, 'id', 'bank_type_id');
     }
 }
