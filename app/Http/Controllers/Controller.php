@@ -172,4 +172,30 @@ class Controller extends BaseController
             throw new \Exception($e->getMessage());
         }
     }
+
+    protected function getAllRelationships($sql)
+    {
+        $expenses = [];
+        $types = BillTypes::all();
+        $slugs = $types->pluck('slug');
+
+        foreach ($slugs as $slug) {
+            $sql->with($this->convertSlugToSnakeCase($slug));
+        }
+
+        $data = $sql->firstOrFail();
+
+        foreach ($slugs as $slug) {
+            $slug = $this->convertSlugToSnakeCase($slug);
+
+            if ($data->{$slug}->isNotEmpty()) {
+                $expenses[$slug] = $data->{$slug}->toArray();
+            }
+        }
+
+        return [
+            'data' => $data,
+            'expenses' => $expenses,
+        ];
+    }
 }

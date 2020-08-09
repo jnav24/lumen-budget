@@ -56,37 +56,21 @@ class BudgetController extends Controller
     public function getSingleBudgetExpenses($id)
     {
         try {
-            $expenses = [];
-            $types = BillTypes::all();
-            $slugs = $types->pluck('slug');
-
             $sql = Budgets::where('user_id', $this->request->auth->id)
                 ->where('id', $id)
                 ->with(['aggregations' => function ($query) {
                     $query->where('type', 'saved');
                 }]);
 
-            foreach ($slugs as $slug) {
-                $sql->with($this->convertSlugToSnakeCase($slug));
-            }
-
-            $data = $sql->first();
-
-            foreach ($slugs as $slug) {
-                $slug = $this->convertSlugToSnakeCase($slug);
-
-                if ($data->{$slug}->isNotEmpty()) {
-                    $expenses[$slug] = $data->{$slug}->toArray();
-                }
-            }
+            ['data' => $data, 'expenses' => $expenses] = $this->getAllRelationships($sql);
 
             return $this->respondWithOK([
                 'budget' => [
                     'id' => $id,
-                    'name' => $data['name'],
-                    'budget_cycle' => $data['budget_cycle'],
+                    'name' => $data->name,
+                    'budget_cycle' => $data->budget_cycle,
                     'expenses' => $expenses,
-                    'saved' => $data['aggregations']->shift()->value,
+                    'saved' => $data->aggregations->shift()->value,
                 ],
             ]);
         } catch (\Exception $e) {

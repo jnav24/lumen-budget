@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\BillTypes;
 use App\Models\BudgetTemplate;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class BudgetTemplateController extends Controller
 {
@@ -40,40 +40,21 @@ class BudgetTemplateController extends Controller
     public function getAllBudgetTemplates()
     {
         try {
-            $data = BudgetTemplate::where('user_id', $this->request->auth->id)
-                ->with('banks')
-                ->with('credit_cards')
-                ->with('investments')
-                ->with('jobs')
-                ->with('medical')
-                ->with('miscellaneous')
-                ->with('utilities')
-                ->with('vehicles')
-                ->first()
-                ->toArray();
-
-            if (empty($data)) {
-                return $this->respondWithBadRequest([], 'User does not have any budget templates');
-            }
+            $sql = BudgetTemplate::where('user_id', $this->request->auth->id);
+            ['data' => $data, 'expenses' => $expenses] = $this->getAllRelationships($sql);
 
             $budgets = [
                 'template' => [
-                    'id' => $data['id'],
-                    'expenses' => [
-                        'banks' => $data['banks'],
-                        'credit_cards' => $data['credit_cards'],
-                        'investments' => $data['investments'],
-                        'jobs' => $data['jobs'],
-                        'medical' => $data['medical'],
-                        'miscellaneous' => $data['miscellaneous'],
-                        'utilities' => $data['utilities'],
-                        'vehicles' => $data['vehicles'],
-                    ]
+                    'id' => $data->id,
+                    'expenses' => $expenses,
                 ],
             ];
 
             return $this->respondWithOK($budgets);
+        } catch (ModelNotFoundException $e) {
+            return $this->respondWithBadRequest([], 'User does not have any budget templates');
         } catch (\Exception $e) {
+            Log::error('BudgetTemplate::getAllBudgetTemplates - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Unable to retrieve budgets at this time.');
         }
     }
