@@ -7,6 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 class BudgetAggregation extends Model
 {
     /**
+     * Mass assignment
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'budget_id',
+        'type',
+        'user_id',
+        'value',
+    ];
+
+    /**
      * Table name
      *
      * @var string
