@@ -21,29 +21,6 @@ class Controller extends BaseController
     protected $request;
 
     /**
-     * Foreign key name
-     *
-     * @var string
-     */
-    protected $tableId;
-
-    /**
-     * Expenses types
-     * @deprecated replace this with BillTypes::all()->pluck('slug'); this is only being called once
-     * @var array
-     */
-    protected $types = [
-        'banks',
-        'credit_cards',
-        'investments',
-        'jobs',
-        'medical',
-        'miscellaneous',
-        'utilities',
-        'vehicles',
-    ];
-
-    /**
      * Create a new controller instance.
      *
      * @param Request $request

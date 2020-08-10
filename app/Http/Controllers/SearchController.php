@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BillTypes;
 use App\Models\Budgets;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -14,11 +15,12 @@ class SearchController extends Controller
     public function runSearch()
     {
         try {
+            $types = BillTypes::all()->pluck('slug')->toArray();
             $validated = $this->validate($this->request, [
                 'billType' => [
                     'required',
                     'min:3',
-                    Rule::in($this->types),
+                    Rule::in($types),
                 ],
                 'year' => [
                     'required',
