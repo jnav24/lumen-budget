@@ -16,8 +16,6 @@ class UtilityTemplate extends Model
         'amount' => null,
         'due_date' => null,
         'utility_type_id' => null,
-        'paid_date' => null,
-        'confirmation' => null,
         'budget_template_id' => null,
     ];
 
@@ -31,8 +29,6 @@ class UtilityTemplate extends Model
         'amount',
         'due_date',
         'utility_type_id',
-        'paid_date',
-        'confirmation',
         'budget_template_id',
     ];
 

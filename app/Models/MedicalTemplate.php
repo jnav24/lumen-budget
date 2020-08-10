@@ -16,9 +16,6 @@ class MedicalTemplate extends Model
         'amount' => null,
         'due_date' => null,
         'medical_type_id' => null,
-        'paid_date' => null,
-        'confirmation' => null,
-        'not_track_amount' => null,
         'budget_template_id' => null,
     ];
 
@@ -32,9 +29,6 @@ class MedicalTemplate extends Model
         'amount',
         'due_date',
         'medical_type_id',
-        'paid_date',
-        'confirmation',
-        'not_track_amount',
         'budget_template_id',
     ];
 

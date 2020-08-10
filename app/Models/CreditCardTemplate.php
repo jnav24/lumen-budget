@@ -21,8 +21,6 @@ class CreditCardTemplate extends Model
         'due_date' => null,
         'credit_card_type_id' => null,
         'amount' => null,
-        'paid_date' => null,
-        'confirmation' => null,
         'balance' => null,
         'budget_template_id' => null,
     ];
@@ -42,8 +40,6 @@ class CreditCardTemplate extends Model
         'due_date',
         'credit_card_type_id',
         'amount',
-        'paid_date',
-        'confirmation',
         'balance',
         'budget_template_id',
     ];

@@ -15,9 +15,6 @@ class PersonalTemplate extends Model
         'name' => null,
         'amount' => null,
         'due_date' => null,
-        'paid_date' => null,
-        'confirmation' => null,
-        'not_track_amount' => null,
         'personal_type_id' => null,
         'budget_template_id' => null,
     ];
@@ -31,9 +28,6 @@ class PersonalTemplate extends Model
         'name',
         'amount',
         'due_date',
-        'paid_date',
-        'confirmation',
-        'not_track_amount',
         'personal_type_id',
         'budget_template_id',
     ];
