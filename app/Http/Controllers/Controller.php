@@ -65,49 +65,6 @@ class Controller extends BaseController
         return (stripos($id, 'temp_') === false);
     }
 
-    /**
-     * Insert or update a table in the DB
-     *
-     * @deprecated
-     * @param array $attributes ; array of column names
-     * @param array $data ; multidimensional array of records to be saved
-     * @param int $id ; foreign key id
-     * @param string $model ; name of table
-     * @return array; returns the same as $data but with updated ids where necessary
-     */
-    protected function insertOrUpdate(array $attributes, array $data, int $id, string $model)
-    {
-        $result = [];
-        $date = [
-            $this->tableId => $id,
-            'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
-        ];
-
-        foreach ($data as $item) {
-            $template = array_intersect_key($item, array_flip($attributes));
-
-            if (!empty($template)) {
-                if (!empty($item['id']) && $this->isNotTempId($item['id'])) {
-                    $savedData = array_merge($template, $date);
-                    DB::table($model)->where('id', $item['id'])->update($savedData);
-                } else {
-                    unset($template['id']);
-                    $date['created_at'] = Carbon::now()->format('Y-m-d H:i:s');
-                    $savedData = array_merge($template, $date);
-                    $id = DB::table($model)->insertGetId($savedData);
-                    $savedData['id'] = $id;
-                }
-
-                unset($savedData[$this->tableId]);
-                unset($savedData['created_at']);
-                unset($savedData['updated_at']);
-                $result[] = $savedData;
-            }
-        }
-
-        return $result;
-    }
-
     protected function convertSlugToSnakeCase(string $string): string
     {
         return str_replace('-', '_', $string);
@@ -149,14 +106,15 @@ class Controller extends BaseController
                     $class = new $model();
 
                     $returnExpenses[$key] = array_map(
-                        function ($expense) use ($model, $class, $budgetId, $id) {
+                        function ($expense) use ($model, $class, $budgetId, $id, $isTemplate) {
                             $expenseId = $this->isNotTempId($expense['id']) ? $expense['id'] : null;
 
                             return $model::updateOrCreate(
                                 ['id' => $expenseId],
                                 array_merge(
                                     array_intersect_key($expense, $class->getAttributes()),
-                                    [$id => $budgetId]
+                                    [$id => $budgetId],
+                                    (!$isTemplate ? ['not_track_amount' => 0] : [])
                                 )
                             );
                         },
@@ -187,10 +145,7 @@ class Controller extends BaseController
 
         foreach ($slugs as $slug) {
             $snakeSlug = $this->convertSlugToSnakeCase($slug);
-
-            if ($data->{$snakeSlug}->isNotEmpty()) {
-                $expenses[$slug] = $data->{$snakeSlug}->toArray();
-            }
+            $expenses[$slug] = $data->{$snakeSlug}->toArray();
         }
 
         return [
