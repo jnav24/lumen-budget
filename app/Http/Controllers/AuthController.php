@@ -7,7 +7,7 @@ use App\Mail\VerifyTokenMailable;
 use App\Models\User;
 use App\Models\UserDevice;
 use App\Models\UserProfile;
-use App\Models\UserVehicles;
+use App\Models\UserVehicle;
 use Carbon\Carbon;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Hash;
@@ -161,7 +161,7 @@ class AuthController extends Controller
             }
 
             $userProfile = UserProfile::where('user_id', $user->id)->first()->toArray();
-            $vehicles = UserVehicles::where('user_id', $user->id)->get()->toArray();
+            $vehicles = UserVehicle::where('user_id', $user->id)->get()->toArray();
 
             return $this->respondWithOK([
                 'user' => [

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\APIResponse;
+use App\Models\BillTypes;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,29 +19,6 @@ class Controller extends BaseController
      * @var \Illuminate\Http\Request
      */
     protected $request;
-
-    /**
-     * Foreign key name
-     *
-     * @var string
-     */
-    protected $tableId;
-
-    /**
-     * Expenses types
-     *
-     * @var array
-     */
-    protected $types = [
-        'banks',
-        'credit_cards',
-        'investments',
-        'jobs',
-        'medical',
-        'miscellaneous',
-        'utilities',
-        'vehicles',
-    ];
 
     /**
      * Create a new controller instance.
@@ -64,85 +42,92 @@ class Controller extends BaseController
         return (stripos($id, 'temp_') === false);
     }
 
-    /**
-     * Insert or update a table in the DB
-     *
-     * @param array $attributes; array of column names
-     * @param array $data; multidimensional array of records to be saved
-     * @param int $id; foreign key id
-     * @param string $model; name of table
-     * @return array; returns the same as $data but with updated ids where necessary
-     */
-    protected function insertOrUpdate(array $attributes, array $data, int $id, string $model)
+    protected function convertSlugToSnakeCase(string $string): string
     {
-        $result = [];
-        $date = [
-            $this->tableId => $id,
-            'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
-        ];
+        return str_replace('-', '_', $string);
+    }
 
-        foreach ($data as $item) {
-            $template = array_intersect_key($item, array_flip($attributes));
+    /**
+     * Save all expenses; works on template expenses as well
+     *
+     * @param $budgetId
+     * @param array $expenses {
+     *      @value array {
+     *          @value string ['name']
+     *          @value string ['amount']
+     *          @value integer ['income_type_id']
+     *          @value Datetime ['initial_pay_date']
+     *      }
+     * }
+     * @param bool $isTemplate
+     * @return array $expenses
+     * @var $expenses[string]array
+     * @throws \Exception
+     */
+    protected function saveExpenses($budgetId, $expenses, $isTemplate = false)
+    {
+        try {
+            DB::beginTransaction();
 
-            if (!empty($template)) {
-                if (!empty($item['id']) && $this->isNotTempId($item['id'])) {
-                    $savedData = array_merge($template, $date);
-                    DB::table($model)->where('id', $item['id'])->update($savedData);
-                } else {
-                    unset($template['id']);
-                    $date['created_at'] = Carbon::now()->format('Y-m-d H:i:s');
-                    $savedData = array_merge($template, $date);
-                    $id = DB::table($model)->insertGetId($savedData);
-                    $savedData['id'] = $id;
+            $types = BillTypes::all();
+            $slugs = $types->pluck('slug');
+
+            $returnExpenses = [];
+
+            foreach ($expenses as $key => $expenseList) {
+                $index = $slugs->search($key);
+                $model = 'App\\Models\\' . $types[$index]->model . (!$isTemplate ? null : 'Template');
+                $id = !$isTemplate ? 'budget_id' : 'budget_template_id';
+
+                if (class_exists($model)) {
+                    $class = new $model();
+
+                    $returnExpenses[$key] = array_map(
+                        function ($expense) use ($model, $class, $budgetId, $id, $isTemplate) {
+                            $expenseId = $this->isNotTempId($expense['id']) ? $expense['id'] : null;
+
+                            return $model::updateOrCreate(
+                                ['id' => $expenseId],
+                                array_merge(
+                                    array_intersect_key($expense, $class->getAttributes()),
+                                    [$id => $budgetId],
+                                    (!$isTemplate ? ['not_track_amount' => 0] : [])
+                                )
+                            );
+                        },
+                        $expenseList
+                    );
                 }
-
-                unset($savedData[$this->tableId]);
-                unset($savedData['created_at']);
-                unset($savedData['updated_at']);
-                $result[] = $savedData;
             }
+
+            DB::commit();
+            return $returnExpenses;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    protected function getAllRelationships($sql)
+    {
+        $expenses = [];
+        $types = BillTypes::all();
+        $slugs = $types->pluck('slug');
+
+        foreach ($slugs as $slug) {
+            $sql->with($this->convertSlugToSnakeCase($slug));
         }
 
-        return $result;
-    }
+        $data = $sql->firstOrFail();
 
-    protected function getBanksAttributes()
-    {
-        return ['id', 'name', 'amount', 'bank_type_id', 'bank_template_id'];
-    }
+        foreach ($slugs as $slug) {
+            $snakeSlug = $this->convertSlugToSnakeCase($slug);
+            $expenses[$slug] = $data->{$snakeSlug}->toArray();
+        }
 
-    protected function getCreditCardsAttributes()
-    {
-        return ['id', 'name', 'limit', 'last_4', 'exp_month', 'exp_year', 'apr', 'due_date', 'credit_card_type_id', 'amount', 'paid_date', 'confirmation', 'balance'];
-    }
-
-    protected function getInvestmentAttributes()
-    {
-        return ['id', 'name', 'amount', 'investment_type_id'];
-    }
-
-    protected function getJobsAttributes()
-    {
-        return ['id', 'name', 'amount', 'job_type_id', 'initial_pay_date'];
-    }
-
-    protected function getMedicalAttributes()
-    {
-        return ['id', 'name', 'amount', 'due_date', 'medical_type_id', 'paid_date', 'confirmation', 'not_track_amount'];
-    }
-
-    protected function getMiscellaneousAttributes()
-    {
-        return ['id', 'name', 'amount', 'due_date', 'paid_date', 'confirmation', 'not_track_amount'];
-    }
-
-    protected function getUtilitiesAttributes()
-    {
-        return ['id', 'name', 'amount', 'due_date', 'utility_type_id', 'paid_date', 'confirmation'];
-    }
-
-    protected function getVehiclesAttributes()
-    {
-        return ['id', 'mileage', 'amount', 'due_date', 'user_vehicle_id', 'vehicle_type_id', 'paid_date', 'confirmation', 'not_track_amount', 'balance'];
+        return [
+            'data' => $data,
+            'expenses' => $expenses,
+        ];
     }
 }

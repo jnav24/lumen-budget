@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Banks;
+use App\Models\Bank;
+use App\Models\BillTypes;
 use App\Models\BudgetAggregation;
 use App\Models\Budgets;
-use App\Models\CreditCards;
-use App\Models\Investments;
-use App\Models\Jobs;
-use App\Models\JobTypes;
+use App\Models\CreditCard;
+use App\Models\Investment;
+use App\Models\Income;
+use App\Models\IncomeType;
 use App\Models\Medical;
 use App\Models\Miscellaneous;
-use App\Models\Utilities;
-use App\Models\Vehicles;
+use App\Models\Utility;
+use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -20,10 +21,6 @@ use Illuminate\Validation\ValidationException;
 
 class BudgetController extends Controller
 {
-    protected $tableId = 'budget_id';
-    private $earned = ['jobs'];
-    private $spent = ['credit_cards', 'medical', 'miscellaneous', 'utilities', 'vehicles'];
-
     public function getAllBudgets()
     {
         try {
@@ -59,37 +56,21 @@ class BudgetController extends Controller
     public function getSingleBudgetExpenses($id)
     {
         try {
-            $data = Budgets::where('user_id', $this->request->auth->id)
+            $sql = Budgets::where('user_id', $this->request->auth->id)
                 ->where('id', $id)
-                ->with('banks')
-                ->with('credit_cards')
-                ->with('investments')
-                ->with('jobs')
-                ->with('medical')
-                ->with('miscellaneous')
-                ->with('utilities')
-                ->with('vehicles')
                 ->with(['aggregations' => function ($query) {
                     $query->where('type', 'saved');
-                }])
-                ->first();
+                }]);
+
+            ['data' => $data, 'expenses' => $expenses] = $this->getAllRelationships($sql);
 
             return $this->respondWithOK([
                 'budget' => [
                     'id' => $id,
-                    'name' => $data['name'],
-                    'budget_cycle' => $data['budget_cycle'],
-                    'expenses' => [
-                        'banks' => $data['banks'],
-                        'credit_cards' => $data['credit_cards'],
-                        'investments' => $data['investments'],
-                        'jobs' => $data['jobs'],
-                        'medical' => $data['medical'],
-                        'miscellaneous' => $data['miscellaneous'],
-                        'utilities' => $data['utilities'],
-                        'vehicles' => $data['vehicles'],
-                    ],
-                    'saved' => $data['aggregations']->shift()->value,
+                    'name' => $data->name,
+                    'budget_cycle' => $data->budget_cycle,
+                    'expenses' => $expenses,
+                    'saved' => $data->aggregations->shift()->value,
                 ],
             ]);
         } catch (\Exception $e) {
@@ -112,43 +93,39 @@ class BudgetController extends Controller
             }
 
             $expenses = $this->request->input('expenses');
+            $id = $this->request->input('id', null);
 
-            if (!empty($this->request->input('id'))) {
-                $budget = Budgets::find($this->request->input('id'));
+            $budget = Budgets::firstOrCreate(
+                ['id' => $id],
+                [
+                    'name' => $this->request->input('name'),
+                    'budget_cycle' => $this->request->input('cycle'),
+                    'user_id' => $this->request->auth->id,
+                ]
+            );
 
-                if (empty($budget)) {
-                    $budget = new Budgets();
-                    $budget->created_at = Carbon::now()->format('Y-m-d H:i:s');
-                    $expenses['jobs'] = $this->generatePaidExpenses($expenses['jobs']);
-                }
-            } else {
-                $budget = new Budgets();
-                $budget->created_at = Carbon::now()->format('Y-m-d H:i:s');
-                $expenses['jobs'] = $this->generatePaidExpenses($expenses['jobs']);
+            if (empty($id)) {
+                $expenses['incomes'] = $this->generatePaidExpenses($expenses['incomes']);
             }
 
-            DB::beginTransaction();
-            $budget->user_id = $this->request->auth->id;
-            $budget->name = $this->request->input('name');
-            $budget->budget_cycle = $this->request->input('cycle');
             $budget->updated_at = Carbon::now()->format('Y-m-d H:i:s');
             $budget->save();
+            $types = BillTypes::all();
+            $returnExpenses = $this->saveExpenses($budget->id, $expenses);
 
-            $returnExpenses = [];
-
-            foreach ($expenses as $key => $expenseList) {
-                $method = 'save_' . $key;
-
-                if (method_exists($this, $method)) {
-                    $returnExpenses[$key] = $this->{$method}($budget->id, $expenseList);
-                }
-            }
-
-            $this->setupAndSaveAggregation($budget->id, $expenses);
+            $this->setupAndSaveAggregation(
+                $budget->id,
+                $expenses,
+                $types->filter(function ($type) {
+                    return $type->save_type;
+                })->pluck('slug')->toArray(),
+                $types->filter(function ($type) {
+                    return !$type->save_type;
+                })->pluck('slug')->toArray()
+            );
             $saved = $budget->aggregations->filter(function ($value, $key) {
                 return $value->type === 'saved';
             });
-            DB::commit();
 
             return $this->respondWithOK([
                 'budget' => [
@@ -163,7 +140,6 @@ class BudgetController extends Controller
         } catch (ValidationException $e) {
             return $this->respondWithBadRequest($e->errors(), 'Errors validating request.');
         } catch (\Exception $e) {
-            DB::rollBack();
             Log::error('BudgetController::saveBudget - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Unable to save budget at this time.');
         }
@@ -171,252 +147,42 @@ class BudgetController extends Controller
 
     public function deleteBudget($id) {
         try {
-            Banks::where($this->tableId, $id)->delete();
-            CreditCards::where($this->tableId, $id)->delete();
-            Investments::where($this->tableId, $id)->delete();
-            Jobs::where($this->tableId, $id)->delete();
-            Medical::where($this->tableId, $id)->delete();
-            Miscellaneous::where($this->tableId, $id)->delete();
-            Utilities::where($this->tableId, $id)->delete();
-            Vehicles::where($this->tableId, $id)->delete();
+            $types = BillTypes::all();
+
+            DB::beginTransaction();
+
+            foreach ($types as $type) {
+                $model = 'App\\Model\\' . $type->model;
+
+                if (class_exists($model)) {
+                    $model::where('budget_id', $id)->delete();
+                }
+            }
+
             Budgets::find($id)->delete();
+            DB::commit();
             return $this->respondWithOK([]);
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('BudgetController::deleteBudget - ' . $e->getMessage());
             return $this->respondWithBadRequest([], 'Unable to delete budget at this time');
         }
     }
 
     /**
-     * Saves banks info; called dynamically from saveBudget()
+     * Setup and Save Aggregations
      *
-     * @param integer $id Budget Id; Foreign Key
-     * @param array $expenses {
-     *      @value integer ['id'] (optional)
-     *      @value integer ['bank_type_id']
-     *      @value string ['amount']
-     *      @value string ['name']
+     * @param integer | string $budgetId
+     * @param array $allExpenses {
+     *      @value array BillType
      * }
-     * @return array {
-     *      @value integer ['id']
-     *      @value integer ['bank_type_id']
-     *      @value string ['amount']
-     *      @value string ['name']
-     * }
+     * @param string[] $earned
+     * @param string[] $spent
      */
-    private function save_banks($id, $expenses)
+    private function setupAndSaveAggregation($budgetId, $allExpenses, $earned, $spent)
     {
-        $attributes = $this->getBanksAttributes();
-        return $this->insertOrUpdate($attributes, $expenses, $id, 'banks');
-    }
-
-    /**
-     * Saves credit card info; called dynamically from saveBudget()
-     *
-     * @param integer $id Budget Id; Foreign Key
-     * @param array $expenses {
-     *      @value integer ['id'] (optional)
-     *      @value string ['name']
-     *      @value string ['limit']
-     *      @value string ['last_4'] (optional)
-     *      @value string ['exp_month'] (optional)
-     *      @value string ['exp_year'] (optional)
-     *      @value integer ['apr'] (optional)
-     *      @value integer ['due_date']
-     *      @value integer ['credit_card_type_id']
-     *      @value Datetime ['paid_date'] (optional)
-     *      @value string ['confirmation'] (optional)
-     *      @value string ['amount'] (optional)
-     * }
-     * @return array {
-     *      @value integer ['id']
-     *      @value string ['name']
-     *      @value string ['limit']
-     *      @value string ['last_4']
-     *      @value string ['exp_month']
-     *      @value string ['exp_year']
-     *      @value integer ['apr']
-     *      @value integer ['due_date']
-     *      @value integer ['credit_card_type_id']
-     *      @value Datetime ['paid_date']
-     *      @value string ['confirmation']
-     *      @value string ['amount']
-     * }
-     */
-    private function save_credit_cards($id, $expenses)
-    {
-        $attributes = $this->getCreditCardsAttributes();
-        return $this->insertOrUpdate($attributes, $expenses, $id, 'credit_cards');
-    }
-
-    /**
-     * Saves investments info; called dynamically from saveBudget()
-     *
-     * @param integer $id Budget Id; Foreign Key
-     * @param array $expenses {
-     *      @value integer ['id'] (optional)
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['investment_type_id']
-     * }
-     * @return array {
-     *      @value integer ['id']
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['investment_type_id']
-     * }
-     */
-    private function save_investments($id, $expenses)
-    {
-        $attributes = $this->getInvestmentAttributes();
-        return $this->insertOrUpdate($attributes, $expenses, $id, 'investments');
-    }
-
-    /**
-     * Saves jobs info; called dynamically from saveBudget()
-     *
-     * @param integer $id Budget Id; Foreign Key
-     * @param array $expenses {
-     *      @value integer ['id'] (optional)
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['job_type_id']
-     *      @value Datetime ['initial_pay_date']
-     * }
-     * @return array {
-     *      @value integer ['id']
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['job_type_id']
-     *      @value Datetime ['initial_pay_date']
-     * }
-     */
-    private function save_jobs($id, $expenses)
-    {
-        $attributes = $this->getJobsAttributes();
-        return $this->insertOrUpdate($attributes, $expenses, $id, 'jobs');
-    }
-
-    /**
-     * Saves medical info; called dynamically from saveBudget()
-     *
-     * @param integer $id Budget Id; Foreign Key
-     * @param array $expenses {
-     *      @value integer ['id'] (optional)
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['due_date']
-     *      @value integer ['medical_type_id']
-     *      @value Datetime ['paid_date'] (optional)
-     *      @value string ['confirmation'] (optional)
-     * }
-     * @return array {
-     *      @value integer ['id']
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['due_date']
-     *      @value integer ['medical_type_id']
-     *      @value Datetime ['paid_date']
-     *      @value string ['confirmation']
-     * }
-     */
-    private function save_medical($id, $expenses)
-    {
-        $attributes = $this->getMedicalAttributes();
-        return $this->insertOrUpdate($attributes, $expenses, $id, 'medical');
-    }
-
-    /**
-     * Saves miscellaneous info; called dynamically from saveBudget()
-     *
-     * @param integer $id Budget Id; Foreign Key
-     * @param array $expenses {
-     *      @value integer ['id'] (optional)
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['due_date']
-     *      @value Datetime ['paid_date'] (optional)
-     *      @value string ['confirmation'] (optional)
-     * }
-     * @return array {
-     *      @value integer ['id']
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['due_date']
-     *      @value Datetime ['paid_date']
-     *      @value string ['confirmation']
-     * }
-     */
-    private function save_miscellaneous($id, $expenses)
-    {
-        $attributes = $this->getMiscellaneousAttributes();
-        return $this->insertOrUpdate($attributes, $expenses, $id, 'miscellaneous');
-    }
-
-    /**
-     * Saves utilities info; called dynamically from saveBudget()
-     *
-     * @param integer $id Budget Id; Foreign Key
-     * @param array $expenses {
-     *      @value integer ['id'] (optional)
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['due_date']
-     *      @value integer ['utility_type_id']
-     *      @value Datetime ['paid_date'] (optional)
-     *      @value string ['confirmation'] (optional)
-     * }
-     * @return array {
-     *      @value integer ['id']
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['due_date']
-     *      @value integer ['utility_type_id']
-     *      @value Datetime ['paid_date']
-     *      @value string ['confirmation']
-     * }
-     */
-    private function save_utilities($id, $expenses)
-    {
-        $attributes = $this->getUtilitiesAttributes();
-        return $this->insertOrUpdate($attributes, $expenses, $id, 'utilities');
-    }
-
-    /**
-     * Saves vehicles; called dynamically from saveBudget()
-     *
-     * @param integer $id budget id; foreign key
-     * @param array $expenses {
-     *      @value integer ['id'] (optional)
-     *      @value string ['mileage']
-     *      @value string ['amount']
-     *      @value integer ['due_date']
-     *      @value integer ['user_vehicle_id']
-     *      @value integer ['vehicle_type_id']
-     *      @value Datetime ['paid_date'] (optional)
-     *      @value string ['confirmation'] (optional)
-     * }
-     * @return array {
-     *      @value integer ['id']
-     *      @value string ['mileage']
-     *      @value string ['amount']
-     *      @value integer ['due_date']
-     *      @value integer ['user_vehicle_id']
-     *      @value integer ['vehicle_type_id']
-     *      @value Datetime ['paid_date']
-     *      @value string ['confirmation']
-     * }
-     */
-    private function save_vehicles($id, $expenses)
-    {
-        $attributes = $this->getVehiclesAttributes();
-        return $this->insertOrUpdate($attributes, $expenses, $id, 'vehicles');
-    }
-
-    private function setupAndSaveAggregation($budgetId, $allExpenses)
-    {
-        $earnedTotal = $this->getAggregationTotal($this->earned, $allExpenses);
-        $spentTotal = $this->getAggregationTotal($this->spent, $allExpenses);
+        $earnedTotal = $this->getAggregationTotal($earned, $allExpenses);
+        $spentTotal = $this->getAggregationTotal($spent, $allExpenses);
         $savedTotal = number_format((float)($earnedTotal - $spentTotal), 2, '.', '');
 
         $this->saveAggregation($budgetId, 'earned', $earnedTotal);
@@ -424,6 +190,15 @@ class BudgetController extends Controller
         $this->saveAggregation($budgetId, 'spent', $spentTotal);
     }
 
+    /**
+     * Get totals for aggregations
+     *
+     * @param string[] $attributes
+     * @param array $allExpenses {
+     *      @value array BillType
+     * }
+     * @return string
+     */
     private function getAggregationTotal($attributes, $allExpenses)
     {
         $total = 0;
@@ -463,24 +238,18 @@ class BudgetController extends Controller
         return $result;
     }
 
-    private function saveAggregation($budgetId, $type, $total)
+    private function saveAggregation($budgetId, $type, $total): void
     {
-        $budget = BudgetAggregation::where('budget_id', $budgetId)
-            ->where('type', $type)
-            ->where('user_id', $this->request->auth->id)
-            ->first();
-
-        if (empty($budget)) {
-            $budget = new BudgetAggregation();
-            $budget->type = $type;
-            $budget->budget_id = $budgetId;
-            $budget->user_id = $this->request->auth->id;
-            $budget->created_at = Carbon::now()->format('Y-m-d H:i:s');
-        }
-
-        $budget->value = $total;
-        $budget->updated_at = Carbon::now()->format('Y-m-d H:i:s');
-        $budget->save();
+        BudgetAggregation::firstOrCreate(
+            [
+                'budget_id' => $budgetId,
+                'type' => $type,
+                'user_id' => $this->request->auth->id
+            ],
+            [
+                'value' => $total,
+            ]
+        );
     }
 
     /**
@@ -489,13 +258,13 @@ class BudgetController extends Controller
      * @param array $expenses {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      * @return array {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      */
@@ -505,14 +274,14 @@ class BudgetController extends Controller
         $results = [];
 
         foreach ($expenses as $job) {
-            $type = JobTypes::find($job['job_type_id'])->toArray();
+            $type = IncomeType::find($job['income_type_id']);
             $startPay = Carbon::createFromTimeString($job['initial_pay_date']);
-
-
-            $method = 'get_' . $type['slug'];
+            $method = 'get_' . $this->convertSlugToSnakeCase($type->slug);
 
             if (method_exists($this, $method)) {
                 $results = array_merge($results, $this->{$method}($job, $startPay, $currentMonth));
+            } else {
+                $results = array_merge($results, $job);
             }
         }
 
@@ -526,7 +295,7 @@ class BudgetController extends Controller
      *      @value integer | string ['id']
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      * @param Carbon $startPay
@@ -535,7 +304,7 @@ class BudgetController extends Controller
      *      @value integer | string ['id']
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      */
@@ -569,7 +338,7 @@ class BudgetController extends Controller
                     'id' => $job['id'],
                     'name' => $job['name'],
                     'amount' => $job['amount'],
-                    'job_type_id' => $job['job_type_id'],
+                    'income_type_id' => $job['income_type_id'],
                     'initial_pay_date' => $initialDate->toDateTimeString(),
                 ];
             }
@@ -587,7 +356,7 @@ class BudgetController extends Controller
      *      @value string ['id']; a temp id is expected
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      * @param Carbon $startPay
@@ -595,7 +364,7 @@ class BudgetController extends Controller
      * @return array {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      */
@@ -631,7 +400,7 @@ class BudgetController extends Controller
                     'id' => $job['id'],
                     'name' => $job['name'],
                     'amount' => $job['amount'],
-                    'job_type_id' => $job['job_type_id'],
+                    'income_type_id' => $job['income_type_id'],
                     'initial_pay_date' => $payWeek->toDateTimeString(),
                     'int' => $i,
                 ];
@@ -648,7 +417,7 @@ class BudgetController extends Controller
      * @param array $job {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      * @param Carbon $startPay
@@ -656,7 +425,7 @@ class BudgetController extends Controller
      * @return array {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      */
@@ -682,7 +451,7 @@ class BudgetController extends Controller
      * @param array $job {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      * @param Carbon $startPay
@@ -690,7 +459,7 @@ class BudgetController extends Controller
      * @return array {
      *      @value string ['name']
      *      @value string ['amount']
-     *      @value integer ['job_type_id']
+     *      @value integer ['income_type_id']
      *      @value Datetime ['initial_pay_date']
      * }
      */
@@ -709,30 +478,8 @@ class BudgetController extends Controller
             'id' => $job['id'],
             'name' => $job['name'],
             'amount' => $job['amount'],
-            'job_type_id' => $job['job_type_id'],
+            'income_type_id' => $job['income_type_id'],
             'initial_pay_date' => $date->toDateTimeString(),
         ];
-    }
-
-    /**
-     * Get one time payment billing cycle; called dynamically from generatePaidExpenses()
-     *
-     * @param array $job {
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['job_type_id']
-     *      @value Datetime ['initial_pay_date']
-     * }
-     * @param Carbon $startPay
-     * @param Carbon $currentMonth
-     * @return array {
-     *      @value string ['name']
-     *      @value string ['amount']
-     *      @value integer ['job_type_id']
-     *      @value Datetime ['initial_pay_date']
-     * }
-     */
-    private function get_one_time($job, $startPay, $currentMonth) {
-        return $job;
     }
 }

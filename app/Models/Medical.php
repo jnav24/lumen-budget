@@ -8,6 +8,38 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Medical extends Model
 {
     /**
+     * Default Attributes
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'name' => null,
+        'amount' => null,
+        'due_date' => null,
+        'medical_type_id' => null,
+        'paid_date' => null,
+        'confirmation' => null,
+        'not_track_amount' => null,
+        'budget_id' => null,
+    ];
+
+    /**
+     * Mass assignment
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'amount',
+        'due_date',
+        'medical_type_id',
+        'paid_date',
+        'confirmation',
+        'not_track_amount',
+        'budget_id',
+    ];
+
+    /**
      * Hide columns
      *
      * @var array
@@ -30,6 +62,6 @@ class Medical extends Model
      */
     public function type()
     {
-        return $this->hasOne(MedicalTypes::class, 'id', 'medical_type_id');
+        return $this->hasOne(MedicalType::class, 'id', 'medical_type_id');
     }
 }
