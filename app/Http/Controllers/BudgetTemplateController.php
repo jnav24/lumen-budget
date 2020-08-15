@@ -19,7 +19,7 @@ class BudgetTemplateController extends Controller
             ]);
 
             $type = BillTypes::where('slug', $this->request->input('type'))->firstOrFail();
-            $model = 'App\\Models\\' . $type->model . 'Template';
+            $model = 'App\\Models\\' . $type->model;
 
             if (class_exists($model)) {
                 $object = $model::find($this->request->input('id'));
