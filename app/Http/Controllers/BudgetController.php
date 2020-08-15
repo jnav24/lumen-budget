@@ -155,11 +155,7 @@ class BudgetController extends Controller
                 $model = 'App\\Model\\' . $type->model;
 
                 if (class_exists($model)) {
-                    $object = $model::where('budget_id', $id);
-
-                    if (!empty($object)) {
-                        $object->delete();
-                    }
+                    $model::where('budget_id', $id)->delete();
                 }
             }
 
