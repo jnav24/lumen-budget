@@ -22,12 +22,7 @@ class BudgetTemplateController extends Controller
             $model = 'App\\Models\\' . $type->model;
 
             if (class_exists($model)) {
-                $object = $model::find($this->request->input('id'));
-
-                if (!empty($object)) {
-                    $object->delete();
-                }
-
+                $model::find($this->request->input('id'))->delete();
                 return $this->respondWithOK([]);
             }
 
