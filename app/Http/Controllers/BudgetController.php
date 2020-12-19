@@ -390,6 +390,10 @@ class BudgetController extends Controller
             $payWeek->addDays(7);
         }
 
+        if ($startWeek > 52) {
+            $startWeek = 1;
+        }
+
         if ($currentMonth->format('M') === 'Dec') {
             $endWeek = 52;
         }
