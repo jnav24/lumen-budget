@@ -166,6 +166,12 @@ class BudgetAggregationController extends Controller
             }
         }
 
+        foreach ($aggregateData as $year => $data) {
+            foreach ($data as $type => $aggregates) {
+                $aggregateData[$year][$type] = array_values(array_reverse($aggregates));
+            }
+        }
+
         return $aggregateData;
     }
 }
