@@ -151,15 +151,23 @@ class BudgetController extends Controller
 
             DB::beginTransaction();
 
+            $budget = Budgets::where('id', $id)
+                ->where('user_id', $this->request->auth->id)
+                ->first();
+
+            if (empty($budget)) {
+                throw new \Exception('Budget ' . $id . ' does not exist');
+            }
+
             foreach ($types as $type) {
                 $model = 'App\\Model\\' . $type->model;
 
                 if (class_exists($model)) {
-                    $model::where('budget_id', $id)->delete();
+                    $model::where('budget_id', $budget->id)->delete();
                 }
             }
 
-            Budgets::find($id)->delete();
+            $budget->delete();
             DB::commit();
             return $this->respondWithOK([]);
         } catch (\Exception $e) {
