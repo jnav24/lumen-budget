@@ -143,13 +143,25 @@ class BudgetAggregationController extends Controller
 
             if (empty($aggregateData[$year])) {
                 $aggregateData[$year] = [
-                    'earned' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
-                    'saved' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
-                    'spent' => ['0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '0.00'],
+                    'earned' => [],
+                    'saved' => [],
+                    'spent' => [],
                 ];
             }
 
             foreach ($item['aggregations'] as $aggregate) {
+                $keys = array_keys($aggregateData[$year][$aggregate['type']]);
+
+                if (!empty($keys)) {
+                    $end = $keys[count($keys)-1];
+
+                    if (($end - 1) !== $cycleMonth) {
+                        for ($i = ($end-1); $i > $cycleMonth-1; $i--) {
+                            $aggregateData[$year][$aggregate['type']][$i] = '0.00';
+                        }
+                    }
+                }
+
                 $aggregateData[$year][$aggregate['type']][$cycleMonth-1] = $aggregate['value'];
             }
         }
