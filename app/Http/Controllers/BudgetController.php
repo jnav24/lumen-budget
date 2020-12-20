@@ -177,6 +177,63 @@ class BudgetController extends Controller
         }
     }
 
+    public function deleteBudgetExpense($id)
+    {
+        try {
+            $expenses = $this->request->input('expenses', null);
+
+            if (empty($expenses) || !is_array($expenses)) {
+                throw new \Exception('Expenses is either missing or value is not an array');
+            }
+
+            $budget = Budgets::where('id', $id)
+                ->where('user_id', $this->request->auth->id)
+                ->first();
+            $types = BillTypes::all();
+
+            if (empty($budget)) {
+                throw new \Exception('Budget ' . $id . ' does not exist');
+            }
+
+            DB::beginTransaction();
+
+            foreach ($expenses as $expense) {
+                if (empty($expense['id']) || empty($expense['type'])) {
+                    throw new \Exception('Expense id or type is missing');
+                }
+
+                $slugs = $types->pluck('slug');
+                $index = $slugs->search($expense['type']);
+                $type = $types[$index];
+
+                if (empty($type)) {
+                    throw new \Exception('Bill type is not found');
+                }
+
+                $model = 'App\\Models\\' . $type->model;
+
+                if (!class_exists($model)) {
+                    throw new \Exception($model . ' model is not found');
+                }
+
+                $object = $model::where('id', $expense['id'])
+                    ->where('budget_id', $budget->id)
+                    ->first();
+
+                if (!empty($object)) {
+                    $object->delete();
+                }
+            }
+
+            DB::commit();
+            return $this->respondWithOK([]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('BudgetController::deleteBudgetExpense - ' . $e->getMessage());
+            return $this->respondWithBadRequest([], 'Unable to delete budget expense at this time');
+        }
+    }
+
     /**
      * Setup and Save Aggregations
      *
