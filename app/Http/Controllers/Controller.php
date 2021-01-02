@@ -86,6 +86,10 @@ class Controller extends BaseController
                             $expenseId = $this->isNotTempId($expense['id']) ? $expense['id'] : null;
                             $notTrack = !empty($expense['not_track_amount']) ? (int)$expense['not_track_amount'] : 0;
 
+                            if ($class->getTable() === 'banks' &&  empty($expense['bank_template_id'])) {
+                                $expense['bank_template_id'] = 0;
+                            }
+
                             return $model::updateOrCreate(
                                 ['id' => $expenseId],
                                 array_merge(
