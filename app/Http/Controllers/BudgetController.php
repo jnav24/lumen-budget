@@ -207,7 +207,7 @@ class BudgetController extends Controller
                 $type = $types[$index];
 
                 if (empty($type)) {
-                    throw new \Exception('Bill type is not found');
+                    throw new \Exception('Bill type ' . $expense['type'] . ' is not found');
                 }
 
                 $model = 'App\\Models\\' . $type->model;
