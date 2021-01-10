@@ -16,6 +16,8 @@ class SearchController extends Controller
     {
         try {
             $types = BillTypes::all()->pluck('slug')->toArray();
+            Log::info('bill types - ' . json_encode($types));
+            Log::info('request - ' . json_encode($this->request->all()));
             $validated = $this->validate($this->request, [
                 'billType' => [
                     'required',
@@ -54,7 +56,7 @@ class SearchController extends Controller
 
             $data = Budgets::where('user_id', $this->request->auth->id)
                 ->whereBetween('budget_cycle', [$from, $to])
-                ->with([$validated['billType'] => function($relation) use ($validated) {
+                ->with([str_replace('-', '_', $validated['billType']) => function($relation) use ($validated) {
                     $ignoreTypeList = ['miscellaneous'];
 
                     $relation->when(!empty($validated['name']), function($query) use ($validated) {

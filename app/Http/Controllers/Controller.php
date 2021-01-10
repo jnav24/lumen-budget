@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Helpers\APIResponse;
 use App\Models\BillTypes;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Laravel\Lumen\Routing\Controller as BaseController;
@@ -85,13 +84,18 @@ class Controller extends BaseController
                     $returnExpenses[$key] = array_map(
                         function ($expense) use ($model, $class, $budgetId, $id, $isTemplate) {
                             $expenseId = $this->isNotTempId($expense['id']) ? $expense['id'] : null;
+                            $notTrack = !empty($expense['not_track_amount']) ? (int)$expense['not_track_amount'] : 0;
+
+                            if ($class->getTable() === 'banks' &&  empty($expense['bank_template_id'])) {
+                                $expense['bank_template_id'] = 0;
+                            }
 
                             return $model::updateOrCreate(
                                 ['id' => $expenseId],
                                 array_merge(
                                     array_intersect_key($expense, $class->getAttributes()),
                                     [$id => $budgetId],
-                                    (!$isTemplate ? ['not_track_amount' => 0] : [])
+                                    (!$isTemplate ? ['not_track_amount' => $notTrack] : [])
                                 )
                             );
                         },
