@@ -117,9 +117,6 @@ class BudgetController extends Controller
                 $budget->id,
                 $expenses,
                 $types->filter(function ($type) {
-                    return $type->save_type;
-                })->pluck('slug')->toArray(),
-                $types->filter(function ($type) {
                     return !$type->save_type;
                 })->pluck('slug')->toArray()
             );
@@ -241,12 +238,11 @@ class BudgetController extends Controller
      * @param array $allExpenses {
      *      @value array BillType
      * }
-     * @param string[] $earned
      * @param string[] $spent
      */
-    private function setupAndSaveAggregation($budgetId, $allExpenses, $earned, $spent)
+    private function setupAndSaveAggregation($budgetId, $allExpenses, $spent)
     {
-        $earnedTotal = $this->getAggregationTotal($earned, $allExpenses);
+        $earnedTotal = $this->getAggregationTotal(['incomes'], $allExpenses);
         $spentTotal = $this->getAggregationTotal($spent, $allExpenses);
         $savedTotal = number_format((float)($earnedTotal - $spentTotal), 2, '.', '');
 
